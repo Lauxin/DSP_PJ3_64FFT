@@ -3,7 +3,9 @@
 `define     DATA_WD         (DATA_RE_WD+DATA_IM_WD)
   `define     DATA_RE_WD      10
   `define     DATA_IM_WD      10
-`define     CFG_WN_WD       10
+`define     CFG_WN_WD       (CFG_WN_RE_WD+CFG_WN_IM_WD)
+  `define     CFG_WN_RE_WD      10
+  `define     CFG_WN_IM_WD      10
 `define     DATA_FRA_WD       8
   
 `define     SIZE_FFT        64

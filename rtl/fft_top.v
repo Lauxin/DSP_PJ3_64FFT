@@ -111,7 +111,7 @@ module fft_top(
   end
 
   // --- fft_core in/out -----------------
-  // input: at "rising edge" of full signal
+  // input: at "rising edge" of full_gx_r
   always @ (*) begin
     case ({full_g0_r,
            full_g1_r,
@@ -123,41 +123,44 @@ module fft_top(
            full_g7_r})
       8'b1000_0000: begin
         CORE_dat_i_w = {};
-        CORE_wn_i_w = {};
+        CORE_wn_i_w  = {};
       end
       8'b0100_0000: begin
         CORE_dat_i_w = {};
-        CORE_wn_i_w = {};
+        CORE_wn_i_w  = {};
       end
       8'b0010_0000: begin
         CORE_dat_i_w = {};
-        CORE_wn_i_w = {};
+        CORE_wn_i_w  = {};
       end
       8'b0001_0000: begin
         CORE_dat_i_w = {};
-        CORE_wn_i_w = {};
+        CORE_wn_i_w  = {};
       end
       8'b0000_1000: begin
         CORE_dat_i_w = {};
-        CORE_wn_i_w = {};
+        CORE_wn_i_w  = {};
       end
       8'b0000_0100: begin
         CORE_dat_i_w = {};
-        CORE_wn_i_w = {};
+        CORE_wn_i_w  = {};
       end
       8'b0000_0010: begin
         CORE_dat_i_w = {};
-        CORE_wn_i_w = {};
+        CORE_wn_i_w  = {};
       end
       8'b0000_0001: begin
         CORE_dat_i_w = {};
-        CORE_wn_i_w = {};
+        CORE_wn_i_w  = {};
       end
-      default     :
+      default     : begin
+        CORE_dat_i_w = {};
+        CORE_wn_i_w  = {};
+      end
     endcase
   end
 
-  // output: at full edge of full signal
+  // output: at full edge of full_gx_r
   always @ (posedge clk or negedge rst) begin
     if (!rst) begin
     end
