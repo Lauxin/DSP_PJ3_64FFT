@@ -111,6 +111,7 @@ module fft_top(
   end
 
   // --- fft_core in/out -----------------
+  // stage 0
   // input: at "rising edge" of full_gx_r
   always @ (*) begin
     case ({full_g0_r,
