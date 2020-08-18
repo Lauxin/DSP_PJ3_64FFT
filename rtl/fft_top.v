@@ -26,35 +26,35 @@ module fft_top(
 
 
 //*** INPUT/OUTPUT *************************************************************
-  input                         clk;
-  input                         rst;
+  input                              clk;
+  input                              rst;
+     
+  input                              val_i;
+  input   [`DATA_FFT_RE_WD    -1 :0] fft_dat_re_i; // unsigned data
+  input   [`DATA_FFT_IM_WD    -1 :0] fft_dat_im_i; // unsigned data
 
-  input                         val_i;
-  input   [`DATA_RE_WD -1   :0] fft_dat_re_i; // unsigned data
-  input   [`DATA_IM_WD -1   :0] fft_dat_im_i; // unsigned data
-
-  output                        val_o;
-  output  [`DATA_RE_WD -1   :0] fft_dat_re_o; // signed data
-  output  [`DATA_IM_WD -1   :0] fft_dat_im_o; // signed data
+  output                             val_o;
+  output  [`DATA_FFT_RE_WD    -1 :0] fft_dat_re_o; // signed data
+  output  [`DATA_FFT_IM_WD    -1 :0] fft_dat_im_o; // signed data
 
 //*** WIRE/REG *****************************************************************
   // d0
-  reg     [`DATA_WD       -1 :0] dat_inp_buf [0:`SIZE_FFT -1];
-  // d1
-  reg     [`DATA_WD       -1 :0] fft_d1_g0_m [0:`SIZE_GRP-1];
-  reg     [`DATA_WD       -1 :0] fft_d1_g1_m [0:`SIZE_GRP-1];
-  reg     [`DATA_WD       -1 :0] fft_d1_g2_m [0:`SIZE_GRP-1];
-  reg     [`DATA_WD       -1 :0] fft_d1_g3_m [0:`SIZE_GRP-1];
-  reg     [`DATA_WD       -1 :0] fft_d1_g4_m [0:`SIZE_GRP-1];
-  reg     [`DATA_WD       -1 :0] fft_d1_g5_m [0:`SIZE_GRP-1];
-  reg     [`DATA_WD       -1 :0] fft_d1_g6_m [0:`SIZE_GRP-1];
-  reg     [`DATA_WD       -1 :0] fft_d1_g7_m [0:`SIZE_GRP-1];
+  reg     [`DATA_FFT_WD       -1 :0] dat_inp_buf [0:`SIZE_FFT -1];
+  // d1   
+  reg     [`DATA_FFT_WD       -1 :0] fft_d1_g0_m [0:`SIZE_GRP-1];
+  reg     [`DATA_FFT_WD       -1 :0] fft_d1_g1_m [0:`SIZE_GRP-1];
+  reg     [`DATA_FFT_WD       -1 :0] fft_d1_g2_m [0:`SIZE_GRP-1];
+  reg     [`DATA_FFT_WD       -1 :0] fft_d1_g3_m [0:`SIZE_GRP-1];
+  reg     [`DATA_FFT_WD       -1 :0] fft_d1_g4_m [0:`SIZE_GRP-1];
+  reg     [`DATA_FFT_WD       -1 :0] fft_d1_g5_m [0:`SIZE_GRP-1];
+  reg     [`DATA_FFT_WD       -1 :0] fft_d1_g6_m [0:`SIZE_GRP-1];
+  reg     [`DATA_FFT_WD       -1 :0] fft_d1_g7_m [0:`SIZE_GRP-1];
 
   // cnt
-  wire    [`LOG2_SIZE_FFT -1 :0] pos_d0_w;
-  reg     [`LOG2_SIZE_FFT -1 :0] pos_d0_r;
-  reg     [`LOG2_SIZE_FFT -1 :0] cnt_inp_r;
-  reg     [`LOG2_SIZE_FFT -1 :0] cnt_out_r;
+  wire    [`LOG2_SIZE_FFT     -1 :0] pos_d0_w;
+  reg     [`LOG2_SIZE_FFT     -1 :0] pos_d0_r;
+  reg     [`LOG2_SIZE_FFT     -1 :0] cnt_inp_r;
+  reg     [`LOG2_SIZE_FFT     -1 :0] cnt_out_r;
 
 //*** MAIN BODY ****************************************************************
   // --- input reorder -----------------
@@ -68,12 +68,13 @@ module fft_top(
     end
   end
 
-  assign pos_d0_w = {cnt_inp_r[`LOG2_SIZE_FFT-6],
-                     cnt_inp_r[`LOG2_SIZE_FFT-5],
-                     cnt_inp_r[`LOG2_SIZE_FFT-4],
-                     cnt_inp_r[`LOG2_SIZE_FFT-3],
-                     cnt_inp_r[`LOG2_SIZE_FFT-2],
-                     cnt_inp_r[`LOG2_SIZE_FFT-1]}
+  // LOG2_FFT_WD equals 6
+  assign pos_d0_w = {cnt_inp_r[0],
+                     cnt_inp_r[1],
+                     cnt_inp_r[2],
+                     cnt_inp_r[3],
+                     cnt_inp_r[4],
+                     cnt_inp_r[5]}
   ;
 
   always @ (posedge clk or negedge rst) begin
