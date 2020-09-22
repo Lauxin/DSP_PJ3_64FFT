@@ -8,6 +8,9 @@ function fft_o = FFT4x16(fft_i_1, fft_i_2, fft_i_3, fft_i_4, group)
     % wn alters according to group
 %====================================================
 
+% defination of group refers to doc/
+% it represents the number of required Wn.
+
 wn = zeros(1,group/2);
 for i = 1:group/2
     wn(i) = exp(-1j*2*pi*(i-1)/group);

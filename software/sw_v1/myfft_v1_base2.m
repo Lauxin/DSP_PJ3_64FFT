@@ -8,7 +8,7 @@ clear;
 
 fft_i = gen_wave("tri",1,20);
 
-% stage 0: reorder input
+%% stage 0: reorder input
 fft_d0_i = zeros(2,32);
 ord_d0 = [0 ,16,8 ,24,4 ,20,12,28,2 ,18,10,26,6 ,22,14,30,1 ,17,9 ,25,5 ,21,13,29,3 ,19,11,27,7 ,23,15,31] + 1;
 for i = 1:32
@@ -17,18 +17,19 @@ for i = 1:32
 end
 fft_d0_o = reshape(fft_d0_i, 1,64);
 
-% stage 1: group 2
+%% stage 1: group 2
+% !!! two rows for one butterfly unit in one base-2-fft
+% !!! each column is a set of inputs for base-n-fft
 fft_d1_i = zeros(2,32);
+% !!! "ord" here is the first positon of every 2 points FFT among all 32 base-2 FFT units. 
 ord_d1 = 1:2:63;
-% !!! "ord" here is the first positon of every 2 points FFT 
-% !!! of all 32 base-2 FFT units. 
 for i = 1:32
     fft_d1_i(1,i) = fft_d0_o(ord_d1(i));
     fft_d1_i(2,i) = fft_d0_o(ord_d1(i)+2/2);
 end
 fft_d1_o = FFT2x32(fft_d1_i(1,:), fft_d1_i(2,:),2);
 
-% stage 2: group 4
+%% stage 2: group 4
 fft_d2_i = zeros(2,32);
 ord_d2 = reshape([1:4:61; 2:4:62], 1,32);
 for i = 1:32
@@ -37,7 +38,7 @@ for i = 1:32
 end
 fft_d2_o = FFT2x32(fft_d2_i(1,:), fft_d2_i(2,:),4);
 
-% stage 3: group 8
+%% stage 3: group 8
 fft_d3_i = zeros(2,32);
 ord_d3 = reshape([1:8:57; 2:8:58; 3:8:59; 4:8:60], 1,32);
 for i = 1:32
@@ -46,7 +47,7 @@ for i = 1:32
 end
 fft_d3_o = FFT2x32(fft_d3_i(1,:), fft_d3_i(2,:),8);
 
-% stage 4: group 16
+%% stage 4: group 16
 fft_d4_i = zeros(2,32);
 ord_d4 = [1:8, 17:24, 33:40, 49:56];
 for i = 1:32
@@ -55,7 +56,7 @@ for i = 1:32
 end
 fft_d4_o = FFT2x32(fft_d4_i(1,:), fft_d4_i(2,:),16);
 
-% stage 5: group 32
+%% stage 5: group 32
 fft_d5_i = zeros(2,32);
 ord_d5 = [1:16, 33:48];
 for i = 1:32
@@ -64,7 +65,7 @@ for i = 1:32
 end
 fft_d5_o = FFT2x32(fft_d5_i(1,:), fft_d5_i(2,:),32);
 
-% stage 6: group 64
+%% stage 6: group 64
 fft_d6_i = zeros(2,32);
 ord_d6 = 1:32;
 for i = 1:32

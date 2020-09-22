@@ -9,6 +9,9 @@ function fft_o = FFT8x8(fft_i_1, fft_i_2, fft_i_3, fft_i_4, ...
     % wn alters according to group
 %====================================================
 
+% TODO: always 8 parrally
+% TODO: do not use group as its meaning is unclear. use stage instead, for example
+
 wn = zeros(1,group/2);
 for i = 1:group/2
     wn(i) = exp(-1j*2*pi*(i-1)/group);

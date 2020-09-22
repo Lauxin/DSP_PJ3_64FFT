@@ -37,8 +37,8 @@ module fft_core2(
   wire   signed [DATA_OUT_WD      -1 :0] fft_dat1_re_o_w, fft_dat1_im_o_w;
   wire   signed [DATA_OUT_WD      -1 :0] fft_dat2_re_o_w, fft_dat2_im_o_w;
 
-  wire   signed [DATA_INP_WD+`CFG_WN_WD+1   -1 :0] fft_cal1_re_w, fft_cal1_im_w
-  wire   signed [DATA_INP_WD+`CFG_WN_WD+1   -1 :0] fft_cal2_re_w, fft_cal2_im_w
+  reg    signed [DATA_INP_WD+`CFG_WN_WD+1   -1 :0] fft_cal1_re_w, fft_cal1_im_w; 
+  reg    signed [DATA_INP_WD+`CFG_WN_WD+1   -1 :0] fft_cal2_re_w, fft_cal2_im_w; 
 
   //*** MAIN BODY ***
   assign fft_dat1_re_i_w = fft_dat1_i[2*DATA_INP_WD -1 : DATA_INP_WD];

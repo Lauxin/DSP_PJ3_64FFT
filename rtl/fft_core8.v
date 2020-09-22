@@ -11,9 +11,9 @@
 
 module fft_core8 ( 
     fft_dat_re_i,
-    fft_dat_im_i
+    fft_dat_im_i,
     fft_wn_re_i,
-    fft_wn_im_i
+    fft_wn_im_i,
 
     fft_dat_re_o,
     fft_dat_im_o
@@ -40,7 +40,7 @@ module fft_core8 (
   input   [4*`CFG_WN_WD    -1 : 0]  fft_wn_im_i;
 
   output  [8*DATA_OUT_WD   -1 : 0]  fft_dat_re_o;
-  output  [8*DATA_OUT_WD   -1 : 0]  fft_dat_re_o;
+  output  [8*DATA_OUT_WD   -1 : 0]  fft_dat_im_o;
 
   //*** WIRE/REG *****************************************************************
   wire    [8*DATA_SG1_WD     -1 : 0] fft_dat_re_d1_w;
@@ -149,8 +149,8 @@ module fft_core8 (
     .fft_dat1_i ( {fft_dat_re_d2_w[8*DATA_SG2_WD-1 : 7*DATA_SG2_WD], fft_dat_im_d2_w[8*DATA_SG2_WD-1 : 7*DATA_SG2_WD]} ),
     .fft_dat2_i ( {fft_dat_re_d2_w[4*DATA_SG2_WD-1 : 3*DATA_SG2_WD], fft_dat_im_d2_w[4*DATA_SG2_WD-1 : 3*DATA_SG2_WD]} ),
     .fft_wn_i   ( {fft_wn_re_i    [4*`CFG_WN_WD -1 : 3* `CFG_WN_WD], fft_wn_im_i    [4*`CFG_WN_WD -1 : 3* `CFG_WN_WD]} ),
-    .fft_dat1_o ( {fft_dat_re_d2_w[8*DATA_OUT_WD-1 : 7*DATA_OUT_WD], fft_dat_im_d2_w[8*DATA_OUT_WD-1 : 7*DATA_OUT_WD]} ),
-    .fft_dat2_o ( {fft_dat_re_d2_w[4*DATA_OUT_WD-1 : 3*DATA_OUT_WD], fft_dat_im_d2_w[4*DATA_OUT_WD-1 : 3*DATA_OUT_WD]} )
+    .fft_dat1_o ( {fft_dat_re_o   [8*DATA_OUT_WD-1 : 7*DATA_OUT_WD], fft_dat_im_o   [8*DATA_OUT_WD-1 : 7*DATA_OUT_WD]} ),
+    .fft_dat2_o ( {fft_dat_re_o   [4*DATA_OUT_WD-1 : 3*DATA_OUT_WD], fft_dat_im_o   [4*DATA_OUT_WD-1 : 3*DATA_OUT_WD]} )
   );
   fft_core2 #(
     .DATA_INP_WD( DATA_SG2_WD ),
@@ -159,8 +159,8 @@ module fft_core8 (
     .fft_dat1_i ( {fft_dat_re_d2_w[7*DATA_SG2_WD-1 : 6*DATA_SG2_WD], fft_dat_im_d2_w[7*DATA_SG2_WD-1 : 6*DATA_SG2_WD]} ),
     .fft_dat2_i ( {fft_dat_re_d2_w[3*DATA_SG2_WD-1 : 2*DATA_SG2_WD], fft_dat_im_d2_w[3*DATA_SG2_WD-1 : 2*DATA_SG2_WD]} ),
     .fft_wn_i   ( {fft_wn_re_i    [3*`CFG_WN_WD -1 : 2* `CFG_WN_WD], fft_wn_im_i    [3*`CFG_WN_WD -1 : 2* `CFG_WN_WD]} ),
-    .fft_dat1_o ( {fft_dat_re_d2_w[7*DATA_OUT_WD-1 : 6*DATA_OUT_WD], fft_dat_im_d2_w[7*DATA_OUT_WD-1 : 6*DATA_OUT_WD]} ),
-    .fft_dat2_o ( {fft_dat_re_d2_w[3*DATA_OUT_WD-1 : 2*DATA_OUT_WD], fft_dat_im_d2_w[3*DATA_OUT_WD-1 : 2*DATA_OUT_WD]} )
+    .fft_dat1_o ( {fft_dat_re_o   [7*DATA_OUT_WD-1 : 6*DATA_OUT_WD], fft_dat_im_o   [7*DATA_OUT_WD-1 : 6*DATA_OUT_WD]} ),
+    .fft_dat2_o ( {fft_dat_re_o   [3*DATA_OUT_WD-1 : 2*DATA_OUT_WD], fft_dat_im_o   [3*DATA_OUT_WD-1 : 2*DATA_OUT_WD]} )
   );
   fft_core2 #(
     .DATA_INP_WD( DATA_SG2_WD ),
@@ -169,8 +169,8 @@ module fft_core8 (
     .fft_dat1_i ( {fft_dat_re_d2_w[6*DATA_SG2_WD-1 : 5*DATA_SG2_WD], fft_dat_im_d2_w[6*DATA_SG2_WD-1 : 5*DATA_SG2_WD]} ),
     .fft_dat2_i ( {fft_dat_re_d2_w[2*DATA_SG2_WD-1 :   DATA_SG2_WD], fft_dat_im_d2_w[2*DATA_SG2_WD-1 :   DATA_SG2_WD]} ),
     .fft_wn_i   ( {fft_wn_re_i    [2*`CFG_WN_WD -1 :    `CFG_WN_WD], fft_wn_im_i    [2*`CFG_WN_WD -1 :    `CFG_WN_WD]} ),
-    .fft_dat1_o ( {fft_dat_re_d2_w[6*DATA_OUT_WD-1 : 5*DATA_OUT_WD], fft_dat_im_d2_w[6*DATA_OUT_WD-1 : 5*DATA_OUT_WD]} ),
-    .fft_dat2_o ( {fft_dat_re_d2_w[2*DATA_OUT_WD-1 :   DATA_OUT_WD], fft_dat_im_d2_w[2*DATA_OUT_WD-1 :   DATA_OUT_WD]} )
+    .fft_dat1_o ( {fft_dat_re_o   [6*DATA_OUT_WD-1 : 5*DATA_OUT_WD], fft_dat_im_o   [6*DATA_OUT_WD-1 : 5*DATA_OUT_WD]} ),
+    .fft_dat2_o ( {fft_dat_re_o   [2*DATA_OUT_WD-1 :   DATA_OUT_WD], fft_dat_im_o   [2*DATA_OUT_WD-1 :   DATA_OUT_WD]} )
   );
   fft_core2 #(
     .DATA_INP_WD( DATA_SG2_WD ),
@@ -179,8 +179,8 @@ module fft_core8 (
     .fft_dat1_i ( {fft_dat_re_d2_w[5*DATA_SG2_WD-1 : 4*DATA_SG2_WD], fft_dat_im_d2_w[5*DATA_SG2_WD-1 : 4*DATA_SG2_WD]} ),
     .fft_dat2_i ( {fft_dat_re_d2_w[  DATA_SG2_WD-1 :             0], fft_dat_im_d2_w[  DATA_SG2_WD-1 :             0]} ),
     .fft_wn_i   ( {fft_wn_re_i    [  `CFG_WN_WD -1 :             0], fft_wn_im_i    [  `CFG_WN_WD -1 :             0]} ),
-    .fft_dat1_o ( {fft_dat_re_d2_w[5*DATA_OUT_WD-1 : 4*DATA_OUT_WD], fft_dat_im_d2_w[5*DATA_OUT_WD-1 : 4*DATA_OUT_WD]} ),
-    .fft_dat2_o ( {fft_dat_re_d2_w[  DATA_OUT_WD-1 :             0], fft_dat_im_d2_w[  DATA_OUT_WD-1 :             0]} )
+    .fft_dat1_o ( {fft_dat_re_o   [5*DATA_OUT_WD-1 : 4*DATA_OUT_WD], fft_dat_im_o   [5*DATA_OUT_WD-1 : 4*DATA_OUT_WD]} ),
+    .fft_dat2_o ( {fft_dat_re_o   [  DATA_OUT_WD-1 :             0], fft_dat_im_o   [  DATA_OUT_WD-1 :             0]} )
   );
 
 endmodule
