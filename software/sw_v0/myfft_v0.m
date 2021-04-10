@@ -15,24 +15,20 @@ fp_out   = fopen('./check_data/fft_data_out.dat'  , 'w');
 
 %% input
 % [x, fs] = audioread('music3.wav');
-x = gen_wave("tri",1,20);
+x = gen_wave("tri",1/16,30);
 
-f = @(x) x;
-% f = @(x) sin(x);
-
-vector = f(x)';
+vector = x';
 
 N = length(vector);
-c = zeros(1,N);
+bitnum = 8;
 
-shiftnum = 8;
 for k = 1:length(vector)
-    fft_i_re = floor(real(vector(k)) * 2^shiftnum);
-    fft_i_im = floor(imag(vector(k)) * 2^shiftnum);
+    fft_i_re = floor(real(vector(k)) * 2^bitnum);
+    fft_i_im = floor(imag(vector(k)) * 2^bitnum);
     fprintf(fp_src,'%d + %di\n', fft_i_re, fft_i_im);
 end
 
-%% 
+%% reorder
 j = 0;
 for i = 1 : N
     fprintf(fp_ord,'%d ',j);
@@ -51,15 +47,14 @@ end
 fprintf(fp_ord,'\n');
 
 for k = 1:length(vector)
-    fft_i_re = floor(real(vector(k)) * 2^shiftnum);
-    fft_i_im = floor(imag(vector(k)) * 2^shiftnum);
+    fft_i_re = floor(real(vector(k)) * 2^bitnum);
+    fft_i_im = floor(imag(vector(k)) * 2^bitnum);
     fprintf(fp_rord,'%d + %di\n', fft_i_re, fft_i_im);
 end
 
 %% 
 depth = log2(N);
 
-% 
 n = N / 2;
 for stage = 1 : depth
     dist = 2 ^ (stage - 1);     % offset 1/2/4/8/...
@@ -87,8 +82,8 @@ for stage = 1 : depth
     fprintf(fp_ord,'\n');
     %dump
     for k = 1:length(vector)
-        re_tmp = floor(real(vector(k)) * 2^shiftnum);
-        im_tmp = floor(imag(vector(k)) * 2^shiftnum);
+        re_tmp = floor(real(vector(k)) * 2^bitnum);
+        im_tmp = floor(imag(vector(k)) * 2^bitnum);
         fprintf(fp_mid, '%d + %di, ', re_tmp,im_tmp);
     end
     fprintf(fp_mid, '\n');
@@ -96,14 +91,14 @@ end % N*LOG(N)
 
 ret_val = vector;
 for k = 1:length(vector)
-    fft_o_re = floor(real(vector(k)) * 2^shiftnum);
-    fft_o_im = floor(imag(vector(k)) * 2^shiftnum);
+    fft_o_re = floor(real(vector(k)) * 2^bitnum);
+    fft_o_im = floor(imag(vector(k)) * 2^bitnum);
     fprintf(fp_out,'%d + %di\n', fft_o_re, fft_o_im);
 end
 for k = 0:N-1
     wn = exp(1i * (-2*pi*k/N));
-    wn_re = floor(real(wn) * 2^shiftnum);
-    wn_im = floor(imag(wn) * 2^shiftnum);
+    wn_re = floor(real(wn) * 2^bitnum);
+    wn_im = floor(imag(wn) * 2^bitnum);
     fprintf(fp_wn, '%d + %di\n', wn_re, wn_im);
 end
 

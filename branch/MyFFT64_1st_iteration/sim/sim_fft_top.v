@@ -10,7 +10,7 @@
 `include "../include/fft_defines.vh"
 
 //--- GLOBAL ---------------------------
-`define TST_TOP 
+`define SIM_TOP 
 `define DUT_TOP 
 
 //--- LOCAL ----------------------------
@@ -18,23 +18,23 @@
 `define DUT_HALF_CLK (`DUT_FULL_CLK / 2)
 
 //--- OTHER DEFINES --------------------
-`define     AUTO_CHECK      "on"
-`define     CHKI_FFT_DATA   "./tv/fft_data_in.dat"
-`define     CHKI_FFT_REORD  "./tv/fft_data_reord.dat"
-`define     CHKI_FFT_ORD    "./tv/fft_ord.dat"
-`define     CHKI_WN         "./tv/fft_wn_64.dat"
-`define     CHKO_FFT        "./tv/fft_data_out.dat"
+`define     AUTO_CHECK          "on"
+`define     CHKI_FFT_DATA       "./check_data/fft_data_in.dat"
+`define     CHKI_FFT_REORD      "./check_data/fft_data_reord.dat"
+`define     CHKI_FFT_ORD        "./check_data/fft_ord.dat"
+`define     CHKI_WN             "./check_data/fft_wn_64.dat"
+`define     CHKO_FFT            "./check_data/fft_data_out.dat"
 
-`define     DMP_FFT_TMP     "./fft_rtl_tmp.dat"
-`define     DMP_FFT_OUT     "./fft_rtl_out.dat"
+`define     DMP_FFT_TMP         "./fft_rtl_tmp.dat"
+`define     DMP_FFT_OUT         "./fft_rtl_out.dat"
 
 `define     DMP_SHM_FILE        "./simul_data/waveform.shm"
-`define     DMP_FSDB_FILE       "./simul_data/waveform.fsdb"
-`define     DMP_VCD_FILE        "./simul_data/waveform.vcd"
-`define     DMP_EVCD_FIL        "./simul_data/waveform.evcd"
+// `define     DMP_FSDB_FILE       "./simul_data/waveform.fsdb"
+// `define     DMP_VCD_FILE        "./simul_data/waveform.vcd"
+// `define     DMP_EVCD_FIL        "./simul_data/waveform.evcd"
 
 
-module `TST_TOP;
+module `SIM_TOP;
 
 //*** PARAMETER ****************************************************************
 
@@ -233,8 +233,8 @@ begin
                        fft_re_o_mem[56], fft_im_o_mem[56], fft_re_o_mem[57], fft_im_o_mem[57], 
                        fft_re_o_mem[58], fft_im_o_mem[58], fft_re_o_mem[59], fft_im_o_mem[59],
                        fft_re_o_mem[60], fft_im_o_mem[60], fft_re_o_mem[61], fft_im_o_mem[61], 
-                       fft_re_o_mem[62], fft_im_o_mem[62], fft_re_o_mem[63], fft_im_o_mem[63] );
-    
+                       fft_re_o_mem[62], fft_im_o_mem[62], fft_re_o_mem[63], fft_im_o_mem[63] 
+            );
         end
     end
 end
@@ -247,9 +247,9 @@ endtask
 // dump fsdb
 `ifdef DMP_FSDB
     initial begin
-        #`DMP_FSDB_TIME ;
+        #`DMP_FSDB_BGN ;
         $fsdbDumpfile( `DMP_FSDB_FILE );
-        $fsdbDumpvars( `TST_TOP );
+        $fsdbDumpvars( `SIM_TOP );
         #(10*`DUT_FULL_CLK );
         $display( "\t\t dump (fsdb) to this test is on !" );
     end
@@ -258,20 +258,20 @@ endtask
 // dump shm
 initial begin
     if( `DMP_SHM=="on" ) begin
-        #`DMP_SHM_TIME ;
+        #`DMP_SHM_BGN ;
         $shm_open( `DMP_SHM_FILE );
-        $shm_probe( `TST_TOP ,`DMP_SHM_LEVEL );
+        $shm_probe( `SIM_TOP ,`DMP_SHM_LVL );
         #(10*`DUT_FULL_CLK );
-        $display( "\t\t dump (shm,%s) to this test is on !" ,`DMP_SHM_LEVEL );
+        $display( "\t\t dump (shm,%s) to this test is on !" ,`DMP_SHM_LVL );
     end
 end
 
 // dump vcd
 `ifdef DMP_VCD
     initial begin
-        #`DMP_VCD_TIME ;
+        #`DMP_VCD_BGN ;
         $dumpfile( `DMP_VCD_FILE );
-        $dumpvars( 0, `TST_TOP );
+        $dumpvars( 0, `SIM_TOP );
         #(10*`DUT_FULL_CLK );
         $display( "\t\t dump (vcd) to this test is on !" );
     end
@@ -280,7 +280,7 @@ end
 // dump evcd
 `ifdef DMP_EVCD
     initial begin
-        #`DMP_EVCD_TIME ;
+        #`DMP_EVCD_BGN ;
         $dumpports( dut ,`DMP_EVCD_FILE );
         #(10*`DUT_FULL_CLK );
         $display( "\t\t dump (evcd) to this test is on !" );
