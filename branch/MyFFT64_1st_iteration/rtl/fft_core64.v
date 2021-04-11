@@ -181,18 +181,18 @@ generate
 genvar i;
     for (i = 0; i<`FFT_LEN/2; i = i+1) begin:fft_core2x32
         fft_core2 fft_core2_u(
-            .fft_data_re1_i(fft_data_re_2x32_i[(2*i+1)*`DATA_WID -1 : (2*i)*`DATA_WID]    ),
-            .fft_data_im1_i(fft_data_im_2x32_i[(2*i+1)*`DATA_WID -1 : (2*i)*`DATA_WID]    ),
-            .fft_data_re2_i(fft_data_re_2x32_i[(2*i+2)*`DATA_WID -1 : (2*i+1)*`DATA_WID]),
-            .fft_data_im2_i(fft_data_im_2x32_i[(2*i+2)*`DATA_WID -1 : (2*i+1)*`DATA_WID]),
+            .fft_data_re1_i ( fft_data_re_2x32_i[(2*i+1)*`DATA_WID -1 : (2*i  )*`DATA_WID] ),
+            .fft_data_im1_i ( fft_data_im_2x32_i[(2*i+1)*`DATA_WID -1 : (2*i  )*`DATA_WID] ),
+            .fft_data_re2_i ( fft_data_re_2x32_i[(2*i+2)*`DATA_WID -1 : (2*i+1)*`DATA_WID] ),
+            .fft_data_im2_i ( fft_data_im_2x32_i[(2*i+2)*`DATA_WID -1 : (2*i+1)*`DATA_WID] ),
 
-            .fft_wn_re_i(fft_wn_re_2x32_i[(i+1)*`WN_WID -1 : i*`WN_WID]),
-            .fft_wn_im_i(fft_wn_im_2x32_i[(i+1)*`WN_WID -1 : i*`WN_WID]),
+            .fft_wn_re_i    ( fft_wn_re_2x32_i[(i+1)*`WN_WID -1 : i*`WN_WID]               ),
+            .fft_wn_im_i    ( fft_wn_im_2x32_i[(i+1)*`WN_WID -1 : i*`WN_WID]               ),
 
-            .fft_data_re1_o(fft_data_re_2x32_o[(2*i+1)*`DATA_WID -1 : (2*i)*`DATA_WID]  ),
-            .fft_data_im1_o(fft_data_im_2x32_o[(2*i+1)*`DATA_WID -1 : (2*i)*`DATA_WID]  ),
-            .fft_data_re2_o(fft_data_re_2x32_o[(2*i+2)*`DATA_WID -1 : (2*i+1)*`DATA_WID]),
-            .fft_data_im2_o(fft_data_im_2x32_o[(2*i+2)*`DATA_WID -1 : (2*i+1)*`DATA_WID])
+            .fft_data_re1_o ( fft_data_re_2x32_o[(2*i+1)*`DATA_WID -1 : (2*i  )*`DATA_WID] ),
+            .fft_data_im1_o ( fft_data_im_2x32_o[(2*i+1)*`DATA_WID -1 : (2*i  )*`DATA_WID] ),
+            .fft_data_re2_o ( fft_data_re_2x32_o[(2*i+2)*`DATA_WID -1 : (2*i+1)*`DATA_WID] ),
+            .fft_data_im2_o ( fft_data_im_2x32_o[(2*i+2)*`DATA_WID -1 : (2*i+1)*`DATA_WID] )
         );
     end
 endgenerate

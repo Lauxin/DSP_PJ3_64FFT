@@ -10,8 +10,8 @@
 `include "../include/fft_defines.vh"
 
 //--- GLOBAL ---------------------------
-`define SIM_TOP 
-`define DUT_TOP 
+`define SIM_TOP -1
+`define DUT_TOP -1
 
 //--- LOCAL ----------------------------
 `define DUT_FULL_CLK 10  //100M
@@ -40,13 +40,13 @@ module `SIM_TOP;
 
 
 //*** INPUT/OUTPUT *************************************************************
-reg clk;
-reg rst_n;
-reg val_i;
-reg signed [`DATA_WID -1 : 0]    fft_data_re_i, fft_data_im_i;
+reg     clk;
+reg     rst_n;
+reg     val_i;
+reg     signed [`DATA_WID -1 : 0]    fft_data_re_i, fft_data_im_i;
 
-wire val_o;
-wire signed [`DATA_WID -1 : 0]    fft_data_re_o, fft_data_im_o;
+wire    val_o;
+wire    signed [`DATA_WID -1 : 0]    fft_data_re_o, fft_data_im_o;
 
 
 
@@ -56,7 +56,7 @@ wire [`FFT_LEN*`DATA_WID -1 : 0]  fft_data_im_tmp_w = dut.fft_core64_u.fft_data_
 
 wire [`FFT_LEN*`DATA_WID -1 : 0]  fft_data_re_o_w = dut.fft_core64_u.fft_data_re_o;
 wire [`FFT_LEN*`DATA_WID -1 : 0]  fft_data_im_o_w = dut.fft_core64_u.fft_data_im_o;
-wire fft_done = dut.fft_done;
+wire fft_done = dut.done;
 
 reg signed [`DATA_WID -1 : 0] fft_re_tmp_mem [0:`FFT_LEN-1];
 reg signed [`DATA_WID -1 : 0] fft_im_tmp_mem [0:`FFT_LEN-1];
@@ -70,12 +70,12 @@ reg signed [`DATA_WID -1 : 0] fft_im_o_mem [0:`FFT_LEN-1];
     .clk(clk),
     .rst_n(rst_n),
 
-    .fft_data_re_i(fft_data_re_i),
-    .fft_data_im_i(fft_data_im_i),
+    .dat_fft_re_i(fft_data_re_i),
+    .dat_fft_im_i(fft_data_im_i),
     .val_i(val_i),
 
-    .fft_data_re_o(fft_data_re_o),
-    .fft_data_im_o(fft_data_im_o),
+    .dat_fft_re_o(fft_data_re_o),
+    .dat_fft_im_o(fft_data_im_o),
     .val_o(val_o)
 );
 
