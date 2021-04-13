@@ -10,61 +10,55 @@
 `include "../include/fft_defines.vh"
 
 module fft_core2(
-    fft_dat1_i,
-    fft_dat2_i,
-    fft_wn_i,
+  dat_fft_1_re_i,
+  dat_fft_1_im_i,
+  dat_fft_2_re_i,
+  dat_fft_2_im_i,
+  dat_wn_re_i,
+  dat_wn_im_i,
+  
+  dat_fft_1_re_o,
+  dat_fft_1_im_o,
+  dat_fft_2_re_o,
+  dat_fft_2_im_o
+);
 
-    fft_dat1_o,
-    fft_dat2_o
-  );
-
-  //*** PARAMETER ***
+//*** PARAMETER ************
+  //global
   parameter     DATA_INP_WD = -1 ;
   parameter     DATA_OUT_WD = -1 ;
-  // DATA_OUT_WD should be (DATA_INP_WD-DATA_FRA_WD) + (CFG_WN_WD-DATA_FRA_WD) +1 + DATA_FRA_WD ;
+  parameter     DATA_W_N_WD = -1 ;
+  parameter     DATA_FRC_WD = -1 ;
+  //derived
+  // localparam    DATA_OUT_WD = (DATA_INP_WD-DATA_FRC_WD) + (DATA_W_N_WD-DATA_FRC_WD) + 1 + DATA_FRC_WD ;
+  localparam    DATA_MUL_WD = DATA_INP_WD + DATA_W_N_WD + 1 ;
 
-  //*** INPUT/OUTPUT ***
-  input  signed [DATA_INP_WD*2    -1 :0] fft_dat1_i;
-  input  signed [DATA_INP_WD*2    -1 :0] fft_dat2_i;
-  input  signed [`CFG_WN_WD*2     -1 :0] fft_wn_i;
+//*** INPUT/OUTPUT *********
+  input  signed [DATA_INP_WD      -1 :0] dat_fft_1_re_i, dat_fft_1_im_i ;
+  input  signed [DATA_INP_WD      -1 :0] dat_fft_2_re_i, dat_fft_2_im_i ;
+  input  signed [DATA_W_N_WD      -1 :0] dat_wn_re_i   , dat_wn_im_i    ;
 
-  output signed [DATA_OUT_WD*2    -1 :0] fft_dat1_o;
-  output signed [DATA_OUT_WD*2    -1 :0] fft_dat2_o;
+  output signed [DATA_OUT_WD      -1 :0] dat_fft_1_re_o, dat_fft_1_im_o ;
+  output signed [DATA_OUT_WD      -1 :0] dat_fft_2_re_o, dat_fft_2_im_o ;
 
-  //*** WIRE/REG ***
-  wire   signed [DATA_INP_WD      -1 :0] fft_dat1_re_i_w, fft_dat1_im_i_w;
-  wire   signed [DATA_INP_WD      -1 :0] fft_dat2_re_i_w, fft_dat2_im_i_w;
-  wire   signed [DATA_OUT_WD      -1 :0] fft_dat1_re_o_w, fft_dat1_im_o_w;
-  wire   signed [DATA_OUT_WD      -1 :0] fft_dat2_re_o_w, fft_dat2_im_o_w;
+//*** WIRE/REG *************
+  reg    signed [DATA_MUL_WD      -1 :0] dat_mul_1_re_w, dat_mul_1_im_w ; 
+  reg    signed [DATA_MUL_WD      -1 :0] dat_mul_2_re_w, dat_mul_2_im_w ; 
 
-  reg    signed [DATA_INP_WD+`CFG_WN_WD+1   -1 :0] fft_cal1_re_w, fft_cal1_im_w; 
-  reg    signed [DATA_INP_WD+`CFG_WN_WD+1   -1 :0] fft_cal2_re_w, fft_cal2_im_w; 
-
-  //*** MAIN BODY ***
-  assign fft_dat1_re_i_w = fft_dat1_i[2*DATA_INP_WD -1 : DATA_INP_WD];
-  assign fft_dat1_im_i_w = fft_dat1_i[DATA_INP_WD   -1 : 0          ];
-  assign fft_dat2_re_i_w = fft_dat2_i[2*DATA_INP_WD -1 : DATA_INP_WD];
-  assign fft_dat2_im_i_w = fft_dat2_i[DATA_INP_WD   -1 : 0          ];
-
-  assign fft_wn_re_i_w = fft_wn_i[2*`CFG_WN_WD -1 : `CFG_WN_WD];
-  assign fft_wn_im_i_w = fft_wn_i[  `CFG_WN_WD -1 : 0         ];
-
+//*** MAIN BODY ************
   // "*" and "<<" in verilog will expend to the output width
   always @(*) begin
-    fft_cal1_re_w = (fft_dat1_re_i_w << `DATA_FRA_WD) + (fft_dat2_re_i_w*fft_wn_re_i_w - fft_dat2_im_i_w*fft_wn_im_i_w);
-    fft_cal1_im_w = (fft_dat1_im_i_w << `DATA_FRA_WD) + (fft_dat2_re_i_w*fft_wn_im_i_w + fft_dat2_im_i_w*fft_wn_re_i_w);
-    fft_cal2_re_w = (fft_dat1_re_i_w << `DATA_FRA_WD) - (fft_dat2_re_i_w*fft_wn_re_i_w - fft_dat2_im_i_w*fft_wn_im_i_w);
-    fft_cal2_im_w = (fft_dat1_im_i_w << `DATA_FRA_WD) - (fft_dat2_re_i_w*fft_wn_im_i_w + fft_dat2_im_i_w*fft_wn_re_i_w);
+    dat_mul_1_re_w = (dat_fft_1_re_i << DATA_FRC_WD) + (dat_fft_2_re_i*dat_wn_re_i - dat_fft_2_im_i*dat_wn_im_i);
+    dat_mul_1_im_w = (dat_fft_1_im_i << DATA_FRC_WD) + (dat_fft_2_re_i*dat_wn_im_i + dat_fft_2_im_i*dat_wn_re_i);
+    dat_mul_2_re_w = (dat_fft_1_re_i << DATA_FRC_WD) - (dat_fft_2_re_i*dat_wn_re_i - dat_fft_2_im_i*dat_wn_im_i);
+    dat_mul_2_im_w = (dat_fft_1_im_i << DATA_FRC_WD) - (dat_fft_2_re_i*dat_wn_im_i + dat_fft_2_im_i*dat_wn_re_i);
   end
 
   // fraction round / floor
-  assign fft_dat1_re_o_w = (fft_cal1_re_w >> `DATA_FRA_WD) /*+ fft_cal_re1_out[`DATA_FRA_WD -1]*/;
-  assign fft_dat1_im_o_w = (fft_cal1_im_w >> `DATA_FRA_WD) /*+ fft_cal_im1_out[`DATA_FRA_WD -1]*/;
-  assign fft_dat2_re_o_w = (fft_cal2_re_w >> `DATA_FRA_WD) /*+ fft_cal_re2_out[`DATA_FRA_WD -1]*/;
-  assign fft_dat2_im_o_w = (fft_cal2_im_w >> `DATA_FRA_WD) /*+ fft_cal_im2_out[`DATA_FRA_WD -1]*/;
-
-  assign fft_dat1_o = {fft_dat1_re_o_w, fft_dat1_im_o_w};
-  assign fft_dat2_o = {fft_dat2_re_o_w, fft_dat2_im_o_w};
+  assign dat_fft_1_re_o = (dat_mul_1_re_w >> DATA_FRC_WD) /*+ fft_cal_re1_out[`DATA_FRC_WD -1]*/;
+  assign dat_fft_1_im_o = (dat_mul_1_im_w >> DATA_FRC_WD) /*+ fft_cal_im1_out[`DATA_FRC_WD -1]*/;
+  assign dat_fft_2_re_o = (dat_mul_2_re_w >> DATA_FRC_WD) /*+ fft_cal_re2_out[`DATA_FRC_WD -1]*/;
+  assign dat_fft_2_im_o = (dat_mul_2_im_w >> DATA_FRC_WD) /*+ fft_cal_im2_out[`DATA_FRC_WD -1]*/;
 
 endmodule
 
