@@ -17,6 +17,16 @@ for i = 1:32
 end
 fft_d0_o = reshape(fft_d0_i, 1,64);
 
+
+% dump wn
+dump_dir = "./check_data/";
+fpt_wn = fopen(dump_dir+"dat_wn_base8_d1_i.dat", "w");
+for i = 1:8/2
+    wn = exp(-1j*2*pi*(i-1)/8);
+    fprintf( fpt_wn, "%d+%di\n",floor(real(wn*2^8)), floor(imag(wn*2^8)) );
+end
+fclose(fpt_wn);
+
 %% stage 1: group 8
 % !!! eight rows for four butterfly units in one base-8-fft
 % !!! each column is a set of inputs for base-n-fft
@@ -43,17 +53,16 @@ fft_d1_o = FFT8x8(fft_d1_i(1,:),...
                   fft_d1_i(8,:), 8);
 
 % dump
-dump_dir = "./check_data/";
-fpt_d1_i = fopen(dump_dir+"fft_dat_base8_d1_i.dat", "w");
-fpt_d1_o = fopen(dump_dir+"fft_dat_base8_d1_o.dat", "w");
+fpt_d1_i = fopen(dump_dir+"dat_fft_base8_d1_i.dat", "w");
+fpt_d1_o = fopen(dump_dir+"dat_fft_base8_d1_o.dat", "w");
 fft_d1_w = reshape(fft_d1_o, 8, []);  % 
 for i = 1:8
     for j = 1:8
-        fprintf( fpt_d1_i, "%d+%di, ", int(real(fft_d1_i(j,i))*2^8), int(imag(fft_d1_i(j,i))*2^8) );
-        fprintf( fpt_d1_o, "%d+%di, ", int(real(fft_d1_w(j,i))*2^8), int(imag(fft_d1_w(j,i))*2^8) );
+        fprintf( fpt_d1_i, "%d+%di\n", floor(real(fft_d1_i(j,i)*2^8)), floor(imag(fft_d1_i(j,i)*2^8)) );
+        fprintf( fpt_d1_o, "%d+%di\n", floor(real(fft_d1_w(j,i)*2^8)), floor(imag(fft_d1_w(j,i)*2^8)) );
     end
-    fprintf(fpt_d1_i,"\n");
-    fprintf(fpt_d1_o,"\n");
+    % fprintf(fpt_d1_i,"\n");
+    % fprintf(fpt_d1_o,"\n");
 end
 fclose(fpt_d1_i);
 fclose(fpt_d1_o);
@@ -81,16 +90,16 @@ fft_o = FFT8x8(fft_d2_i(1,:),...
                fft_d2_i(8,:),64);
 
 % dump
-fpt_d2_i = fopen(dump_dir+"fft_dat_base8_d2_i.dat", "w");
-fpt_d2_o = fopen(dump_dir+"fft_dat_base8_d2_o.dat", "w");
+fpt_d2_i = fopen(dump_dir+"dat_fft_base8_d2_i.dat", "w");
+fpt_d2_o = fopen(dump_dir+"dat_fft_base8_d2_o.dat", "w");
 fft_d2_w = reshape(fft_o', 8, []);
 for i = 1:8
     for j = 1:8
-        fprintf( fpt_d2_i, "%d+%di, ", real(fft_d2_i(j,i))*2^8, imag(fft_d2_i(j,i))*2^8 );
-        fprintf( fpt_d2_o, "%d+%di, ", real(fft_d2_w(j,i))*2^8, imag(fft_d2_w(j,i))*2^8 );
+        fprintf( fpt_d2_i, "%d+%di\n", floor(real(fft_d2_i(j,i)*2^8)), floor(imag(fft_d2_i(j,i)*2^8)) );
+        fprintf( fpt_d2_o, "%d+%di\n", floor(real(fft_d2_w(j,i)*2^8)), floor(imag(fft_d2_w(j,i)*2^8)) );
     end
-    fprintf(fpt_d2_i,"\n");
-    fprintf(fpt_d2_o,"\n");
+    % fprintf(fpt_d2_i,"\n");
+    % fprintf(fpt_d2_o,"\n");
 end
 fclose(fpt_d1_i);
 fclose(fpt_d1_o);

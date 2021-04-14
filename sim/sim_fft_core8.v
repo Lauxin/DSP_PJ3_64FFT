@@ -2,7 +2,7 @@
     //
     //  Filename       : sim_fft_core8.v
     //  Author         : LX
-    //  Created        : 2019-12-03
+    //  Created        : 2021-04-14
     //  Description    : testbench for fft_core8
     //                   
 //------------------------------------------------------------------------------
@@ -11,85 +11,112 @@
 
 //--- GLOBAL ---------------------------
 `define     SIM_TOP             sim_fft_core8
+`define     SIM_TOP_STR         "sim_fft_core8"
 `define     DUT_TOP             fft_core8
+`define     DUT_TOP_STR         "fft_core8"
 
 //--- LOCAL ----------------------------
 `define     DUT_FULL_CLK        10  // 100M
 `define     DUT_HALF_CLK        (`DUT_FULL_CLK / 2)
 
 //--- OTHER DEFINES --------------------
-`define     INIT_CFG_WN_FILE    "./check_data/fft_wn_64.dat"
+`define     INIT_DAT_W_N_FILE   "./check_data/dat_wn_base8_d1_i.dat"
 
-`define     CHKI_FFT_DAT_FILE   "./check_data/fft_dat_in.dat"
+`define     CHKI_DAT_FFT_FILE   "./check_data/dat_fft_base8_d1_i.dat"
 
-`define     CHKO          "on"
-  `define     CHKO_FFT_DAT        `CHKO
-`define     CHKO_FFT_DAT_FILE   "./check_data/fft_dat_out.dat"
+`define     CHKO_DAT_FFT        "off"
+`define     CHKO_DAT_FFT_FILE   "./check_data/dat_fft_base8_d1_o.dat"
+
+`define     DUMP_DAT_FFT_FILE   "./dat_fft_d1_o.dat"
 
 `define     DMP_SHM_FILE        "./simul_data/waveform.shm"
 `define     DMP_FSDB_FILE       "./simul_data/waveform.fsdb"
 `define     DMP_VCD_FILE        "./simul_data/waveform.vcd"
-`define     DMP_EVCD_FIL        "./simul_data/waveform.evcd"
+`define     DMP_EVCD_FILE       "./simul_data/waveform.evcd"
 
 
-module `SIM_TOP();
+module `SIM_TOP;
 //*** PARAMETER ****************************************************************
-  localparam DATA_INP_WD = `DATA_FFT_WD ;
-  localparam DATA_OUT_WD = 3*((DATA_INP_WD-`DATA_FRA_WD) + (`CFG_WN_WD-`DATA_FRA_WD) +1) + `DATA_FRA_WD ;
+  localparam DATA_INP_WD = 10 ;
+  localparam DATA_W_N_WD = 10 ;
+  localparam DATA_FRC_WD = 8  ;
+  localparam DATA_OUT_WD = 3*((DATA_INP_WD-DATA_FRC_WD) + (DATA_W_N_WD-DATA_FRC_WD) +1) + DATA_FRC_WD ;
 
 //*** INPUT/OUTPUT *************************************************************
-  wire   [8*DATA_INP_WD   -1 : 0]  fft_dat_re_i;
-  wire   [8*DATA_INP_WD   -1 : 0]  fft_dat_im_i;
-  wire   [4*`CFG_WN_WD    -1 : 0]  fft_wn_re_i;
-  wire   [4*`CFG_WN_WD    -1 : 0]  fft_wn_im_i;
+  reg                                 clk ;
+  reg                                 rst_n ;
+  reg                                 val_i ;
+  wire       [8*DATA_INP_WD   -1 : 0] dat_fft_re_i ;
+  wire       [8*DATA_INP_WD   -1 : 0] dat_fft_im_i ;
+  wire       [4*DATA_W_N_WD   -1 : 0] dat_wn_re_i  ;
+  wire       [4*DATA_W_N_WD   -1 : 0] dat_wn_im_i  ;
 
-  wire   [8*DATA_OUT_WD   -1 : 0]  fft_dat_re_o;
-  wire   [8*DATA_OUT_WD   -1 : 0]  fft_dat_im_o;
+  wire                                val_o ;
+  wire       [8*DATA_OUT_WD   -1 : 0] dat_fft_re_o ;
+  wire       [8*DATA_OUT_WD   -1 : 0] dat_fft_im_o ;
 
 
 //*** WIRE/REG *****************************************************************
-  reg        [DATA_INP_WD   -1 : 0] ram_fft_dat_re [0:8 -1];
-  reg        [DATA_INP_WD   -1 : 0] ram_fft_dat_im [0:8 -1];
+  reg signed [DATA_INP_WD     -1 : 0] ram_dat_fft_re_i[0:8 -1];
+  reg signed [DATA_INP_WD     -1 : 0] ram_dat_fft_im_i[0:8 -1];
 
-  reg signed [`CFG_WN_WD    -1 : 0] cfg_fft_wn_re [0:4 -1];
-  reg signed [`CFG_WN_WD    -1 : 0] cfg_fft_wn_im [0:4 -1];
+  reg signed [DATA_W_N_WD     -1 : 0] ram_dat_wn_re_i [0:4 -1];
+  reg signed [DATA_W_N_WD     -1 : 0] ram_dat_wn_im_i [0:4 -1];
 
-  reg                               clk ;
-  reg                               rst ;
+  reg signed [DATA_OUT_WD     -1 : 0] ram_dat_fft_re_o[0:8 -1];
+  reg signed [DATA_OUT_WD     -1 : 0] ram_dat_fft_im_o[0:8 -1];
 
-  event init_cfg_wn_event;
-  event chki_fft_dat_event;
 
+  event init_dat_wn_event ;
+  event chki_dat_fft_event;
 
 //*** DUT **********************************************************************
   `DUT_TOP #(
-    .DATA_INP_WD   ( DATA_INP_WD  ),
-    .DATA_OUT_WD   ( DATA_OUT_WD  )
+    .DATA_INP_WD  ( DATA_INP_WD  ),
+    .DATA_OUT_WD  ( DATA_OUT_WD  ),
+    .DATA_W_N_WD  ( DATA_W_N_WD  ),
+    .DATA_FRC_WD  ( DATA_FRC_WD  )
   ) dut(
-    .fft_dat_re_i  ( fft_dat_re_i ),
-    .fft_dat_im_i  ( fft_dat_im_i ),
-    .fft_wn_re_i   ( fft_wn_re_i  ),
-    .fft_wn_im_i   ( fft_wn_im_i  ),
-    .fft_dat_re_o  ( fft_dat_re_o ),
-    .fft_dat_im_o  ( fft_dat_im_o )
+    .rst_n        ( rst_n        ),
+    .clk          ( clk          ),
+    .val_i        ( val_i        ),
+    .dat_fft_re_i ( dat_fft_re_i ),
+    .dat_fft_im_i ( dat_fft_im_i ),
+    .dat_wn_re_i  ( dat_wn_re_i  ),
+    .dat_wn_im_i  ( dat_wn_im_i  ),
+    .val_o        ( val_o        ),
+    .dat_fft_re_o ( dat_fft_re_o ),
+    .dat_fft_im_o ( dat_fft_im_o )
   );
 
 //*** MAIN BODY ****************************************************************
-  assign fft_dat_re_i = {ram_fft_dat_re[7], ram_fft_dat_re[6],
-                         ram_fft_dat_re[5], ram_fft_dat_re[4],
-                         ram_fft_dat_re[3], ram_fft_dat_re[2],
-                         ram_fft_dat_re[1], ram_fft_dat_re[0]  };
-
-  assign fft_dat_im_i = {ram_fft_dat_im[7], ram_fft_dat_im[6],
-                         ram_fft_dat_im[5], ram_fft_dat_im[4],
-                         ram_fft_dat_im[3], ram_fft_dat_im[2],
-                         ram_fft_dat_im[1], ram_fft_dat_im[0]  };
-
-  assign fft_wn_re_i = { cfg_fft_wn_re[3], cfg_fft_wn_re[2], 
-                         cfg_fft_wn_re[1], cfg_fft_wn_re[0]  }; 
-
-  assign fft_wn_im_i = { cfg_fft_wn_im[3], cfg_fft_wn_im[2], 
-                         cfg_fft_wn_im[1], cfg_fft_wn_im[0]  };
+  //input
+  assign dat_fft_re_i = {ram_dat_fft_re_i[7], ram_dat_fft_re_i[6],
+                         ram_dat_fft_re_i[5], ram_dat_fft_re_i[4],
+                         ram_dat_fft_re_i[3], ram_dat_fft_re_i[2],
+                         ram_dat_fft_re_i[1], ram_dat_fft_re_i[0]}
+  ;
+  assign dat_fft_im_i = {ram_dat_fft_im_i[7], ram_dat_fft_im_i[6],
+                         ram_dat_fft_im_i[5], ram_dat_fft_im_i[4],
+                         ram_dat_fft_im_i[3], ram_dat_fft_im_i[2],
+                         ram_dat_fft_im_i[1], ram_dat_fft_im_i[0]}
+  ;
+  assign dat_wn_re_i  = {ram_dat_wn_re_i[3], ram_dat_wn_re_i[2], 
+                         ram_dat_wn_re_i[1], ram_dat_wn_re_i[0]}
+  ;
+  assign dat_wn_im_i  = {ram_dat_wn_im_i[3], ram_dat_wn_im_i[2], 
+                         ram_dat_wn_im_i[1], ram_dat_wn_im_i[0]}
+  ;
+  //output
+  genvar i;
+  generate
+    for (i = 0; i < 8; i = i+1) begin:final_result
+      always @(dat_fft_re_o or dat_fft_im_o) begin
+        ram_dat_fft_re_o[i] = dat_fft_re_o[(i+1)*DATA_OUT_WD -1 -: DATA_OUT_WD];
+        ram_dat_fft_im_o[i] = dat_fft_im_o[(i+1)*DATA_OUT_WD -1 -: DATA_OUT_WD];
+      end
+    end
+  endgenerate
 
   // clk
   initial begin
@@ -100,38 +127,54 @@ module `SIM_TOP();
     end
   end
 
-  // rst
+  // rst_n
   initial begin
-    rst = 'd0 ;
-    #(5 * `DUT_FULL_CLK) ;
+    rst_n = 'd0 ;
+    #(2*`DUT_FULL_CLK) ;
     @(negedge clk) ;
-    rst = 'd1 ;
+    rst_n = 'd1 ;
   end
 
-  // init
-  
-  // prepare data
+  // main
   initial begin
-    -> init_cfg_wn_event;
-    forever begin
+    // log
+    $display( "\n\n*** CHECK %s BEGIN ! ***\n", `DUT_TOP_STR );
+
+    // init
+    rst_n        = 'd0 ;
+    clk          = 'd0 ;
+    val_i        = 'd0 ;
+    // dat_fft_re_i = 'd0 ;
+    // dat_fft_im_i = 'd0 ;
+    // dat_wn_re_i  = 'd0 ;
+    // dat_wn_im_i  = 'd0 ;
+
+    // delay
+    #(5*`DUT_FULL_CLK);
+
+    -> init_dat_wn_event;
+    repeat(4) begin
       @(negedge clk) ;
-      -> chki_fft_dat_event;
+      val_i = 'd1;
+      -> chki_dat_fft_event;
     end
+    @(negedge clk) ;
+    val_i = 'd0;
   end
 
   // finish
   initial begin
-    #(`DUT_FULL_CLK*100) $finish;
+    #(100*`DUT_FULL_CLK) $stop;
   end
 
 
 //*** INIT **********************************************************************
-  // INIT_CFG_WN
+  // INIT_DAT_W_N
   initial begin
-    INIT_CFG_WN;
+    INIT_DAT_W_N;
   end
 
-  task INIT_CFG_WN;
+  task INIT_DAT_W_N;
     // variables
     integer fpt;
     integer i  ;
@@ -143,7 +186,7 @@ module `SIM_TOP();
     // main body
     begin
       // open files
-      fpt = $fopen(`INIT_CFG_WN_FILE, "r");
+      fpt = $fopen(`INIT_DAT_W_N_FILE, "r");
 
       // logs
       $display("\t\t init wn for fft...");
@@ -151,25 +194,26 @@ module `SIM_TOP();
       // core
       forever begin
         // wait
-        @(init_cfg_wn_event);
+        @(init_dat_wn_event);
 
         // read file
         for (i=0; i<4; i=i+1) begin
           tmp = $fscanf(fpt, "%d+%di\n", dat_re, dat_im);
-          cfg_fft_wn_re[i] = dat_re;
-          cfg_fft_wn_im[i] = dat_im;
+          ram_dat_wn_re_i[i] = dat_re;
+          ram_dat_wn_im_i[i] = dat_im;
         end
       end
     end
   endtask
 
+
 //*** CHKI **********************************************************************
-  // CHKI_FFT_DAT
+  // CHKI_DAT_FFT
   initial begin
-    CHKI_FFT_DAT;
+    CHKI_DAT_FFT;
   end
 
-  task CHKI_FFT_DAT;
+  task CHKI_DAT_FFT;
     // variables
     integer fpt;
     integer i  ;
@@ -181,71 +225,61 @@ module `SIM_TOP();
     // main body
     begin
       // open files
-      fpt = $fopen(`CHKI_FFT_DAT_FILE,"r");
+      fpt = $fopen(`CHKI_DAT_FFT_FILE,"r");
 
       // logs
-      $display("\n\t check in fft input...");
+      $display("\n\t read fft input...");
 
       // core
       forever begin
         // wait
-        @(chki_fft_dat_event);
+        @(chki_dat_fft_event);
 
         // read file
-        for (i=0; i<8; i=i+1) begin:inp_fft_dat
+        for (i=0; i<8; i=i+1) begin
           tmp = $fscanf(fpt, "%d+%di\n", dat_re, dat_im);
-          ram_fft_dat_re[i] = dat_re;
-          ram_fft_dat_im[i] = dat_im;
+          ram_dat_fft_re_i[i] = dat_re;
+          ram_dat_fft_im_i[i] = dat_im;
         end
       end
     end
   endtask
 
+
 //*** CHKO **********************************************************************
 
-
-//*** WAVEFORM ******************************************************************
-  // dump fsdb
-  `ifdef DMP_FSDB
-    initial begin
-      #`DMP_FSDB_BGN ;
-      $fsdbDumpfile( `DMP_FSDB_FILE );
-      $fsdbDumpvars( `SIM_TOP );
-      #(10*`DUT_FULL_CLK );
-      $display( "\t\t dump (fsdb) to this test is on !" );
-    end
-  `endif
-
-  // dump shm
+  // CHKO_DAT_FFT
   initial begin
-    if( `DMP_SHM=="on" ) begin
-      #`DMP_SHM_BGN ;
-      $shm_open( `DMP_SHM_FILE );
-      $shm_probe( `SIM_TOP ,`DMP_SHM_LVL );
-      #(10*`DUT_FULL_CLK );
-      $display( "\t\t dump (shm,%s) to this test is on !" ,`DMP_SHM_LVL );
-    end
+    CHKO_DAT_FFT;
   end
 
-  // dump vcd
-  `ifdef DMP_VCD
-    initial begin
-      #`DMP_VCD_BGN ;
-      $dumpfile( `DMP_VCD_FILE );
-      $dumpvars( 0, `SIM_TOP );
-      #(10*`DUT_FULL_CLK );
-      $display( "\t\t dump (vcd) to this test is on !" );
-    end
-  `endif
+  task CHKO_DAT_FFT;
+    // variables
+    integer fpt;
+    integer i  ;
+    integer tmp;
 
-  // dump evcd
-  `ifdef DMP_EVCD
-    initial begin
-      #`DMP_EVCD_BGN ;
-      $dumpports( dut ,`DMP_EVCD_FILE );
-      #(10*`DUT_FULL_CLK );
-      $display( "\t\t dump (evcd) to this test is on !" );
+    // main body
+    begin
+      // open files
+      fpt = $fopen(`DUMP_DAT_FFT_FILE, "w");
+
+      // logs
+      $display("\n\t dump fft output...");
+
+      // core
+      forever begin
+        @(negedge clk) ;
+
+        if (val_o) begin
+          for (i=0; i<8; i=i+1) begin
+            $fdisplay(fpt, "%x+%xi", ram_dat_fft_re_o[i], ram_dat_fft_im_o[i]);
+          end
+        end
+      end
     end
-  `endif
+
+  endtask
+
 
 endmodule
