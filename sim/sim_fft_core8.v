@@ -273,7 +273,7 @@ module `SIM_TOP;
 
         if (val_o) begin
           for (i=0; i<8; i=i+1) begin
-            $fdisplay(fpt, "%x+%xi", ram_dat_fft_re_o[i], ram_dat_fft_im_o[i]);
+            $fdisplay(fpt, "%x(%d)+%x(%d)i", ram_dat_fft_re_o[i], ram_dat_fft_re_o[i], ram_dat_fft_im_o[i], ram_dat_fft_im_o[i]);
           end
         end
       end

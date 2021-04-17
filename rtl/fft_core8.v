@@ -303,8 +303,8 @@ module fft_core8 (
   ) fft_core2_u23 (
     .dat_fft_1_re_i (dat_fft_re_d2_r[4*DATA_SG2_WD-1 -: DATA_SG2_WD]),
     .dat_fft_1_im_i (dat_fft_im_d2_r[4*DATA_SG2_WD-1 -: DATA_SG2_WD]),
-    .dat_fft_2_re_i (dat_fft_re_d2_r[7*DATA_SG2_WD-1 -: DATA_SG2_WD]),
-    .dat_fft_2_im_i (dat_fft_im_d2_r[7*DATA_SG2_WD-1 -: DATA_SG2_WD]),
+    .dat_fft_2_re_i (dat_fft_re_d2_r[8*DATA_SG2_WD-1 -: DATA_SG2_WD]),
+    .dat_fft_2_im_i (dat_fft_im_d2_r[8*DATA_SG2_WD-1 -: DATA_SG2_WD]),
     .dat_wn_re_i    (dat_wn_re_i    [4*DATA_W_N_WD-1 -: DATA_W_N_WD]),
     .dat_wn_im_i    (dat_wn_im_i    [4*DATA_W_N_WD-1 -: DATA_W_N_WD]),
     .dat_fft_1_re_o (dat_fft_re_o   [4*DATA_OUT_WD-1 -: DATA_OUT_WD]),

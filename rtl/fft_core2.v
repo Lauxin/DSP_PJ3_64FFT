@@ -55,10 +55,10 @@ module fft_core2(
   end
 
   // fraction round / floor
-  assign dat_fft_1_re_o = (dat_mul_1_re_w >> DATA_FRC_WD) /*+ fft_cal_re1_out[`DATA_FRC_WD -1]*/;
-  assign dat_fft_1_im_o = (dat_mul_1_im_w >> DATA_FRC_WD) /*+ fft_cal_im1_out[`DATA_FRC_WD -1]*/;
-  assign dat_fft_2_re_o = (dat_mul_2_re_w >> DATA_FRC_WD) /*+ fft_cal_re2_out[`DATA_FRC_WD -1]*/;
-  assign dat_fft_2_im_o = (dat_mul_2_im_w >> DATA_FRC_WD) /*+ fft_cal_im2_out[`DATA_FRC_WD -1]*/;
+  assign dat_fft_1_re_o = (dat_mul_1_re_w >>> DATA_FRC_WD) /*+ fft_cal_re1_out[`DATA_FRC_WD -1]*/;
+  assign dat_fft_1_im_o = (dat_mul_1_im_w >>> DATA_FRC_WD) /*+ fft_cal_im1_out[`DATA_FRC_WD -1]*/;
+  assign dat_fft_2_re_o = (dat_mul_2_re_w >>> DATA_FRC_WD) /*+ fft_cal_re2_out[`DATA_FRC_WD -1]*/;
+  assign dat_fft_2_im_o = (dat_mul_2_im_w >>> DATA_FRC_WD) /*+ fft_cal_im2_out[`DATA_FRC_WD -1]*/;
 
 endmodule
 
