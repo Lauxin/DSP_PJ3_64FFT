@@ -48,17 +48,17 @@ module fft_core2(
 //*** MAIN BODY ************
   // "*" and "<<" in verilog will expend to the output width
   always @(*) begin
-    dat_mul_1_re_w = (dat_fft_1_re_i << DATA_FRC_WD) + (dat_fft_2_re_i*dat_wn_re_i - dat_fft_2_im_i*dat_wn_im_i);
-    dat_mul_1_im_w = (dat_fft_1_im_i << DATA_FRC_WD) + (dat_fft_2_re_i*dat_wn_im_i + dat_fft_2_im_i*dat_wn_re_i);
-    dat_mul_2_re_w = (dat_fft_1_re_i << DATA_FRC_WD) - (dat_fft_2_re_i*dat_wn_re_i - dat_fft_2_im_i*dat_wn_im_i);
-    dat_mul_2_im_w = (dat_fft_1_im_i << DATA_FRC_WD) - (dat_fft_2_re_i*dat_wn_im_i + dat_fft_2_im_i*dat_wn_re_i);
+    dat_mul_1_re_w = (dat_fft_1_re_i <<< DATA_FRC_WD) + (dat_fft_2_re_i * dat_wn_re_i - dat_fft_2_im_i * dat_wn_im_i);
+    dat_mul_1_im_w = (dat_fft_1_im_i <<< DATA_FRC_WD) + (dat_fft_2_re_i * dat_wn_im_i + dat_fft_2_im_i * dat_wn_re_i);
+    dat_mul_2_re_w = (dat_fft_1_re_i <<< DATA_FRC_WD) - (dat_fft_2_re_i * dat_wn_re_i - dat_fft_2_im_i * dat_wn_im_i);
+    dat_mul_2_im_w = (dat_fft_1_im_i <<< DATA_FRC_WD) - (dat_fft_2_re_i * dat_wn_im_i + dat_fft_2_im_i * dat_wn_re_i);
   end
 
-  // fraction round / floor
-  assign dat_fft_1_re_o = (dat_mul_1_re_w >>> DATA_FRC_WD) /*+ fft_cal_re1_out[`DATA_FRC_WD -1]*/;
-  assign dat_fft_1_im_o = (dat_mul_1_im_w >>> DATA_FRC_WD) /*+ fft_cal_im1_out[`DATA_FRC_WD -1]*/;
-  assign dat_fft_2_re_o = (dat_mul_2_re_w >>> DATA_FRC_WD) /*+ fft_cal_re2_out[`DATA_FRC_WD -1]*/;
-  assign dat_fft_2_im_o = (dat_mul_2_im_w >>> DATA_FRC_WD) /*+ fft_cal_im2_out[`DATA_FRC_WD -1]*/;
+  // fraction floor
+  assign dat_fft_1_re_o = (dat_mul_1_re_w >>> DATA_FRC_WD);
+  assign dat_fft_1_im_o = (dat_mul_1_im_w >>> DATA_FRC_WD);
+  assign dat_fft_2_re_o = (dat_mul_2_re_w >>> DATA_FRC_WD);
+  assign dat_fft_2_im_o = (dat_mul_2_im_w >>> DATA_FRC_WD);
 
 endmodule
 

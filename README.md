@@ -31,3 +31,6 @@ Use base 8 FFT first as it contains the least number of stage.
 - pipe line
    - not consider. 
 
+### what should be involved in the new architecture
+1. Increase precision while calculating butterfly FFT unit. Otherwise error would accumulate at each stage.
+2. use modelsim as the simulator.
