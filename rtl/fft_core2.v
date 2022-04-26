@@ -7,58 +7,62 @@
     //                   
 //------------------------------------------------------------------------------
 
-`include "../include/fft_defines.vh"
 
 module fft_core2(
-  dat_fft_1_re_i,
-  dat_fft_1_im_i,
-  dat_fft_2_re_i,
-  dat_fft_2_im_i,
-  dat_wn_re_i,
-  dat_wn_im_i,
+  fft_din_1_re,
+  fft_din_1_im,
+  fft_din_2_re,
+  fft_din_2_im,
+  fft_wn_re,
+  fft_wn_im,
   
-  dat_fft_1_re_o,
-  dat_fft_1_im_o,
-  dat_fft_2_re_o,
-  dat_fft_2_im_o
+  fft_dout_1_re,
+  fft_dout_1_im,
+  fft_dout_2_re,
+  fft_dout_2_im
 );
 
 //*** PARAMETER ************
   //global
-  parameter     DATA_INP_WD = -1 ;
-  parameter     DATA_OUT_WD = -1 ;
-  parameter     DATA_W_N_WD = -1 ;
-  parameter     DATA_FRC_WD = -1 ;
+  parameter     FFT_DATA_WD   = 10 ;
+  parameter     FFT_WN_WD     = 10 ;
   //derived
-  // localparam    DATA_OUT_WD = (DATA_INP_WD-DATA_FRC_WD) + (DATA_W_N_WD-DATA_FRC_WD) + 1 + DATA_FRC_WD ;
-  localparam    DATA_MUL_WD = DATA_INP_WD + DATA_W_N_WD + 1 ;
+  localparam    DATA_MUL_ADD_WD = FFT_DATA_WD + FFT_WN_WD + 1 ;
+  localparam    DATA_WN_FRC_WD = FFT_WN_WD - 2;
 
 //*** INPUT/OUTPUT *********
-  input  signed [DATA_INP_WD      -1 :0] dat_fft_1_re_i, dat_fft_1_im_i ;
-  input  signed [DATA_INP_WD      -1 :0] dat_fft_2_re_i, dat_fft_2_im_i ;
-  input  signed [DATA_W_N_WD      -1 :0] dat_wn_re_i   , dat_wn_im_i    ;
+  input       signed [FFT_DATA_WD      -1 :0] fft_din_1_re;
+  input       signed [FFT_DATA_WD      -1 :0] fft_din_1_im;
+  input       signed [FFT_DATA_WD      -1 :0] fft_din_2_re;
+  input       signed [FFT_DATA_WD      -1 :0] fft_din_2_im;
+  input       signed [FFT_WN_WD        -1 :0] fft_wn_re;
+  input       signed [FFT_WN_WD        -1 :0] fft_wn_im;
 
-  output signed [DATA_OUT_WD      -1 :0] dat_fft_1_re_o, dat_fft_1_im_o ;
-  output signed [DATA_OUT_WD      -1 :0] dat_fft_2_re_o, dat_fft_2_im_o ;
+  output wire signed [FFT_DATA_WD      -1 :0] fft_dout_1_re;
+  output wire signed [FFT_DATA_WD      -1 :0] fft_dout_1_im;
+  output wire signed [FFT_DATA_WD      -1 :0] fft_dout_2_re;
+  output wire signed [FFT_DATA_WD      -1 :0] fft_dout_2_im;
 
 //*** WIRE/REG *************
-  reg    signed [DATA_MUL_WD      -1 :0] dat_mul_1_re_w, dat_mul_1_im_w ; 
-  reg    signed [DATA_MUL_WD      -1 :0] dat_mul_2_re_w, dat_mul_2_im_w ; 
+  reg    signed [DATA_MUL_ADD_WD  -1 :0] dat_mul_add_1_re;
+  reg    signed [DATA_MUL_ADD_WD  -1 :0] dat_mul_add_1_im;
+  reg    signed [DATA_MUL_ADD_WD  -1 :0] dat_mul_add_2_re;
+  reg    signed [DATA_MUL_ADD_WD  -1 :0] dat_mul_add_2_im;
 
 //*** MAIN BODY ************
   // "*" and "<<" in verilog will expend to the output width
   always @(*) begin
-    dat_mul_1_re_w = (dat_fft_1_re_i <<< DATA_FRC_WD) + (dat_fft_2_re_i * dat_wn_re_i - dat_fft_2_im_i * dat_wn_im_i);
-    dat_mul_1_im_w = (dat_fft_1_im_i <<< DATA_FRC_WD) + (dat_fft_2_re_i * dat_wn_im_i + dat_fft_2_im_i * dat_wn_re_i);
-    dat_mul_2_re_w = (dat_fft_1_re_i <<< DATA_FRC_WD) - (dat_fft_2_re_i * dat_wn_re_i - dat_fft_2_im_i * dat_wn_im_i);
-    dat_mul_2_im_w = (dat_fft_1_im_i <<< DATA_FRC_WD) - (dat_fft_2_re_i * dat_wn_im_i + dat_fft_2_im_i * dat_wn_re_i);
+    dat_mul_add_1_re = (fft_din_1_re <<< DATA_WN_FRC_WD) + (fft_din_2_re * fft_wn_re - fft_din_2_im * fft_wn_im);
+    dat_mul_add_1_im = (fft_din_1_im <<< DATA_WN_FRC_WD) + (fft_din_2_im * fft_wn_re + fft_din_2_re * fft_wn_im);
+    dat_mul_add_2_re = (fft_din_1_re <<< DATA_WN_FRC_WD) - (fft_din_2_re * fft_wn_re - fft_din_2_im * fft_wn_im);
+    dat_mul_add_2_im = (fft_din_1_im <<< DATA_WN_FRC_WD) - (fft_din_2_im * fft_wn_re + fft_din_2_re * fft_wn_im);
   end
 
   // fraction floor
-  assign dat_fft_1_re_o = (dat_mul_1_re_w >>> DATA_FRC_WD);
-  assign dat_fft_1_im_o = (dat_mul_1_im_w >>> DATA_FRC_WD);
-  assign dat_fft_2_re_o = (dat_mul_2_re_w >>> DATA_FRC_WD);
-  assign dat_fft_2_im_o = (dat_mul_2_im_w >>> DATA_FRC_WD);
+  assign fft_dout_1_re = (dat_mul_add_1_re >>> DATA_WN_FRC_WD);
+  assign fft_dout_1_im = (dat_mul_add_1_im >>> DATA_WN_FRC_WD);
+  assign fft_dout_2_re = (dat_mul_add_2_re >>> DATA_WN_FRC_WD);
+  assign fft_dout_2_im = (dat_mul_add_2_im >>> DATA_WN_FRC_WD);
 
 endmodule
 

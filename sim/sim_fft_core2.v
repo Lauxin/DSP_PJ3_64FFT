@@ -7,18 +7,17 @@
     //                   
 //------------------------------------------------------------------------------
 
-`include "../include/fft_defines.vh"
 
 //--- GLOBAL ---------------------------
 `define     SIM_TOP             sim_fft_core2
 `define     DUT_TOP             fft_core2
 
 //--- LOCAL ----------------------------
-`define     DUT_FULL_CLK        10  // 100M
+`define     DUT_FULL_CLK        10
 `define     DUT_HALF_CLK        (`DUT_FULL_CLK / 2)
 
 //--- OTHER DEFINES --------------------
-// `define     INIT_DATA_W_N_FILE    "./check_data/fft_wn_64.dat"
+// `define     INIT_DATA_W_N_FILE    "./check_data/cfg_fft_wn_64.dat"
 
 // `define     CHKI_DATA_FFT_FILE    "./check_data/dat_fft_in.dat"
 
@@ -35,25 +34,21 @@
 module `SIM_TOP;
 //*** PARAMETER ****************************************************************
   //global
-  localparam DATA_INP_WD = 10 ;
-  // localparam DATA_OUT_WD = 15 ;
-  localparam DATA_W_N_WD = 10 ;
-  localparam DATA_FRC_WD = 8 ;
-  //derived
-  localparam DATA_OUT_WD = (DATA_INP_WD-DATA_FRC_WD) + (DATA_W_N_WD-DATA_FRC_WD) + 1 + DATA_FRC_WD ;
+  localparam FFT_DATA_WD = 10 ;
+  localparam FFT_WN_WD = 10 ;
 
 //*** INPUT/OUTPUT *************************************************************
-  reg    [DATA_INP_WD     -1 : 0]  dat_fft_1_re_i ;
-  reg    [DATA_INP_WD     -1 : 0]  dat_fft_1_im_i ;
-  reg    [DATA_INP_WD     -1 : 0]  dat_fft_2_re_i ;
-  reg    [DATA_INP_WD     -1 : 0]  dat_fft_2_im_i ;
-  reg    [DATA_W_N_WD     -1 : 0]  dat_wn_re_i    ;
-  reg    [DATA_W_N_WD     -1 : 0]  dat_wn_im_i    ;
+  reg  signed  [FFT_DATA_WD     -1 : 0] fft_din_1_re;
+  reg  signed  [FFT_DATA_WD     -1 : 0] fft_din_1_im;
+  reg  signed  [FFT_DATA_WD     -1 : 0] fft_din_2_re;
+  reg  signed  [FFT_DATA_WD     -1 : 0] fft_din_2_im;
+  reg  signed  [FFT_WN_WD       -1 : 0] fft_wn_re;
+  reg  signed  [FFT_WN_WD       -1 : 0] fft_wn_im;
 
-  wire   [DATA_OUT_WD     -1 : 0]  dat_fft_1_re_o ;
-  wire   [DATA_OUT_WD     -1 : 0]  dat_fft_1_im_o ;
-  wire   [DATA_OUT_WD     -1 : 0]  dat_fft_2_re_o ;
-  wire   [DATA_OUT_WD     -1 : 0]  dat_fft_2_im_o ;
+  wire signed  [FFT_DATA_WD     -1 : 0] fft_dout_1_re;
+  wire signed  [FFT_DATA_WD     -1 : 0] fft_dout_1_im;
+  wire signed  [FFT_DATA_WD     -1 : 0] fft_dout_2_re;
+  wire signed  [FFT_DATA_WD     -1 : 0] fft_dout_2_im;
 
 
 //*** WIRE/REG *****************************************************************
@@ -63,22 +58,19 @@ module `SIM_TOP;
 
 //*** DUT **********************************************************************
   `DUT_TOP #(
-    .DATA_INP_WD     ( DATA_INP_WD ),
-    .DATA_OUT_WD     ( DATA_OUT_WD ),
-    .DATA_W_N_WD     ( DATA_W_N_WD ),
-    .DATA_FRC_WD     ( DATA_FRC_WD )
+    .FFT_DATA_WD     ( FFT_DATA_WD ),
+    .FFT_WN_WD       ( FFT_WN_WD   )
   ) dut(
-    .dat_fft_1_re_i ( dat_fft_1_re_i ),
-    .dat_fft_1_im_i ( dat_fft_1_im_i ),
-    .dat_fft_2_re_i ( dat_fft_2_re_i ),
-    .dat_fft_2_im_i ( dat_fft_2_im_i ),
-    .dat_wn_re_i    ( dat_wn_re_i    ),
-    .dat_wn_im_i    ( dat_wn_im_i    ),
-
-    .dat_fft_1_re_o ( dat_fft_1_re_o ),
-    .dat_fft_1_im_o ( dat_fft_1_im_o ),
-    .dat_fft_2_re_o ( dat_fft_2_re_o ),
-    .dat_fft_2_im_o ( dat_fft_2_im_o )
+    .fft_din_1_re  ( fft_din_1_re  ),
+    .fft_din_1_im  ( fft_din_1_im  ),
+    .fft_din_2_re  ( fft_din_2_re  ),
+    .fft_din_2_im  ( fft_din_2_im  ),
+    .fft_wn_re     ( fft_wn_re     ),
+    .fft_wn_im     ( fft_wn_im     ),
+    .fft_dout_1_re ( fft_dout_1_re ),
+    .fft_dout_1_im ( fft_dout_1_im ),
+    .fft_dout_2_re ( fft_dout_2_re ),
+    .fft_dout_2_im ( fft_dout_2_im )
   );
 
 //*** MAIN BODY ****************************************************************
@@ -102,12 +94,12 @@ module `SIM_TOP;
   // main
   initial begin
     #(20*`DUT_FULL_CLK) ;
-    dat_fft_1_re_i = 'sd50;
-    dat_fft_1_im_i = -'sd260;
-    dat_fft_2_re_i = -'sd367;
-    dat_fft_2_im_i = 'sd30;
-    dat_wn_re_i    = -'sd154;
-    dat_wn_im_i    = 'sd70;
+    fft_din_1_re = 'sd50;
+    fft_din_1_im = -'sd260;
+    fft_din_2_re = -'sd367;
+    fft_din_2_im = 'sd30;
+    fft_wn_re    = -'sd154;
+    fft_wn_im    = 'sd70;
     #(100*`DUT_FULL_CLK) ;
     $stop;
   end
