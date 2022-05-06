@@ -69,8 +69,10 @@ module fft_core8 (
   wire    [FFT_DATA_WD     -1 : 0] fft_stg3_re_unfold[0:7];
   wire    [FFT_DATA_WD     -1 : 0] fft_stg3_im_unfold[0:7];
 
-  wire    [FFT_WN_WD       -1 : 0] fft_wn_re_unfold[0:6];
-  wire    [FFT_WN_WD       -1 : 0] fft_wn_im_unfold[0:6];
+  reg     [6*FFT_WN_WD     -1 : 0] fft_wn_re_d1;
+  reg     [6*FFT_WN_WD     -1 : 0] fft_wn_im_d1;
+  reg     [4*FFT_WN_WD     -1 : 0] fft_wn_re_d2;
+  reg     [4*FFT_WN_WD     -1 : 0] fft_wn_im_d2;
 
   reg                              vld_d1       ;
   reg                              vld_d2       ;
@@ -110,22 +112,20 @@ module fft_core8 (
     end
   end
 
-  //!!! wn pipe
-  assign fft_wn_re_unfold[0] = fft_wn_re[  FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_re_unfold[1] = fft_wn_re[2*FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_re_unfold[2] = fft_wn_re[3*FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_re_unfold[3] = fft_wn_re[4*FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_re_unfold[4] = fft_wn_re[5*FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_re_unfold[5] = fft_wn_re[6*FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_re_unfold[6] = fft_wn_re[7*FFT_WN_WD -1 -: FFT_WN_WD];
-
-  assign fft_wn_im_unfold[0] = fft_wn_im[  FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_im_unfold[1] = fft_wn_im[2*FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_im_unfold[2] = fft_wn_im[3*FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_im_unfold[3] = fft_wn_im[4*FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_im_unfold[4] = fft_wn_im[5*FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_im_unfold[5] = fft_wn_im[6*FFT_WN_WD -1 -: FFT_WN_WD];
-  assign fft_wn_im_unfold[6] = fft_wn_im[7*FFT_WN_WD -1 -: FFT_WN_WD];
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      fft_wn_re_d1 <= 'd0;
+      fft_wn_im_d1 <= 'd0;
+      fft_wn_re_d2 <= 'd0;
+      fft_wn_im_d2 <= 'd0;
+    end
+    else if (vld_in | vld_d1) begin
+      fft_wn_re_d1 <= fft_wn_re[7*FFT_WN_WD -1 : FFT_WN_WD];
+      fft_wn_im_d1 <= fft_wn_im[7*FFT_WN_WD -1 : FFT_WN_WD];
+      fft_wn_re_d2 <= fft_wn_re_d1[6*FFT_WN_WD -1 : 2*FFT_WN_WD];
+      fft_wn_im_d2 <= fft_wn_im_d1[6*FFT_WN_WD -1 : 2*FFT_WN_WD];
+    end
+  end
 
   //===== stage 1 =====
   // 0 1 | 2 3 | 4 5 | 6 7
@@ -159,8 +159,8 @@ module fft_core8 (
         .fft_din_1_im  ( fft_din_im_unfold[2*i]    ),
         .fft_din_2_re  ( fft_din_re_unfold[2*i+1]  ),
         .fft_din_2_im  ( fft_din_im_unfold[2*i+1]  ),
-        .fft_wn_re     ( fft_wn_re_unfold[0]       ),
-        .fft_wn_im     ( fft_wn_im_unfold[0]       ),
+        .fft_wn_re     ( fft_wn_re[0 +: FFT_WN_WD] ),
+        .fft_wn_im     ( fft_wn_im[0 +: FFT_WN_WD] ),
         .fft_dout_1_re ( fft_stg1_re_unfold[2*i]   ),
         .fft_dout_1_im ( fft_stg1_im_unfold[2*i]   ),
         .fft_dout_2_re ( fft_stg1_re_unfold[2*i+1] ),
@@ -222,8 +222,8 @@ module fft_core8 (
         .fft_din_1_im  ( fft_stg1_im_d_unfold[2*j]   ),
         .fft_din_2_re  ( fft_stg1_re_d_unfold[2*j+1] ),
         .fft_din_2_im  ( fft_stg1_im_d_unfold[2*j+1] ),
-        .fft_wn_re     ( fft_wn_re_unfold[1+(j%2)]   ),
-        .fft_wn_im     ( fft_wn_im_unfold[1+(j%2)]   ),
+        .fft_wn_re     ( fft_wn_re_d1[(j%2)*FFT_WN_WD +: FFT_WN_WD] ),
+        .fft_wn_im     ( fft_wn_im_d1[(j%2)*FFT_WN_WD +: FFT_WN_WD] ),
         .fft_dout_1_re ( fft_stg2_re_unfold[2*j]     ),
         .fft_dout_1_im ( fft_stg2_im_unfold[2*j]     ),
         .fft_dout_2_re ( fft_stg2_re_unfold[2*j+1]   ),
@@ -285,8 +285,8 @@ module fft_core8 (
         .fft_din_1_im  ( fft_stg2_im_d_unfold[2*k]   ),
         .fft_din_2_re  ( fft_stg2_re_d_unfold[2*k+1] ),
         .fft_din_2_im  ( fft_stg2_im_d_unfold[2*k+1] ),
-        .fft_wn_re     ( fft_wn_re_unfold[3+k]       ),
-        .fft_wn_im     ( fft_wn_im_unfold[3+k]       ),
+        .fft_wn_re     ( fft_wn_re_d2[k*FFT_WN_WD +: FFT_WN_WD] ),
+        .fft_wn_im     ( fft_wn_im_d2[k*FFT_WN_WD +: FFT_WN_WD] ),
         .fft_dout_1_re ( fft_stg3_re_unfold[2*k]     ),
         .fft_dout_1_im ( fft_stg3_im_unfold[2*k]     ),
         .fft_dout_2_re ( fft_stg3_re_unfold[2*k+1]   ),
