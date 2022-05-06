@@ -17,13 +17,14 @@
 `define     DUT_HALF_CLK        (`DUT_FULL_CLK / 2)
 
 //--- OTHER DEFINES --------------------
-// `define     INIT_DATA_W_N_FILE    "./check_data/cfg_fft_wn_64.dat"
+`define     INIT_FFT_W_N_FILE   "./check_data/fft2_wn_in.dat"
 
-// `define     CHKI_DATA_FFT_FILE    "./check_data/dat_fft_in.dat"
+`define     CHKI_FFT_DAT_FILE   "./check_data/fft2_data_in.dat"
 
-// `define     CHKO          "on"
-//   `define     CHKO_DATA_FFT       `CHKO
-// `define     CHKO_DATA_FFT_FILE    "./check_data/dat_fft_out.dat"
+`define     CHKO_FFT_DAT        "on"
+`define     CHKO_FFT_DAT_FILE   "./check_data/fft2_data_out.dat"
+
+`define     DUMP_FFT_DAT_FILE   "./rtl_fft8_data_out.dat"
 
 // `define     DMP_SHM_FILE        "./simul_data/waveform.shm"
 // `define     DMP_FSDB_FILE       "./simul_data/waveform.fsdb"
@@ -50,10 +51,14 @@ module `SIM_TOP;
   wire signed  [FFT_DATA_WD     -1 : 0] fft_dout_2_re;
   wire signed  [FFT_DATA_WD     -1 : 0] fft_dout_2_im;
 
+  event chki_fft_wn_event ;
+  event chki_fft_dat_event;
+
 
 //*** WIRE/REG *****************************************************************
   reg                               clk ;
   reg                               rst ;
+  reg                               fft_en;
 
 
 //*** DUT **********************************************************************
@@ -85,35 +90,134 @@ module `SIM_TOP;
 
   // rst
   initial begin
-    rst = 'd0 ;
-    #(5 * `DUT_FULL_CLK) ;
-    @(negedge clk) ;
-    rst = 'd1 ;
+    rst = 'd0;
+    #(2 * `DUT_FULL_CLK);
+    rst = 'd1;
   end
 
   // main
   initial begin
-    #(20*`DUT_FULL_CLK) ;
-    fft_din_1_re = 'sd50;
-    fft_din_1_im = -'sd260;
-    fft_din_2_re = -'sd367;
-    fft_din_2_im = 'sd30;
-    fft_wn_re    = -'sd154;
-    fft_wn_im    = 'sd70;
-    #(100*`DUT_FULL_CLK) ;
-    $stop;
+    // init
+    fft_en = 1'b0;
+
+    // delay
+    #(5 * `DUT_FULL_CLK);
+
+    // main
+    repeat (200) begin
+      @(posedge clk);
+      fft_en = 1'b1;
+      -> chki_fft_wn_event ;
+      -> chki_fft_dat_event;
+    end
+    @(posedge clk);
+    fft_en = 1'b0;
+  end
+
+  //finish
+  initial begin
+    #(1000*`DUT_FULL_CLK) $stop;
   end
 
 
 //*** INIT **********************************************************************
-  // INIT_DATA_W_N
 
 
 //*** CHKI **********************************************************************
-  // CHKI_DATA_FFT
+  initial fork
+    CHKI_FFT_DAT;
+    CHKI_FFT_WN ;
+  join
+
+  task CHKI_FFT_DAT;
+    // variables
+    integer fp;
+    integer i;
+    integer tmp;
+
+    // main body
+    begin
+      // open files
+      fp = $fopen(`CHKI_FFT_DAT_FILE,"r");
+
+      // logs
+      $display("\n\t read fft input...");
+
+      // core
+      forever begin
+        // wait
+        @(chki_fft_dat_event);
+
+        // read file
+        tmp = $fscanf(fp, "(%d+%dj), (%d+%dj)\n", fft_din_1_re, fft_din_1_im, fft_din_2_re, fft_din_2_im);
+      end
+    end
+  endtask
+
+
+  task CHKI_FFT_WN;
+    // variables
+    integer fp;
+    integer i;
+    integer tmp;
+
+    // main body
+    begin
+      // open files
+      fp = $fopen(`INIT_FFT_W_N_FILE, "r");
+
+      // logs
+      $display("\t\t read wn for fft...");
+
+      // core
+      forever begin
+        // wait
+        @(chki_fft_wn_event);
+
+        // read file
+        tmp = $fscanf(fp, "(%d+%dj)\n", fft_wn_re, fft_wn_im);
+      end
+    end
+  endtask
 
 
 //*** CHKO **********************************************************************
+  initial fork
+    CHKO_FFT_DAT;
+  join
 
+  task CHKO_FFT_DAT;
+    // variables
+    integer fp;
+    integer i;
+    integer tmp;
+    reg  [FFT_WN_WD -1 :0] dout_1_re;
+    reg  [FFT_WN_WD -1 :0] dout_1_im;
+    reg  [FFT_WN_WD -1 :0] dout_2_re;
+    reg  [FFT_WN_WD -1 :0] dout_2_im;
+
+    // main body
+    begin
+      // open files
+      fp = $fopen(`CHKO_FFT_DAT_FILE, "r");
+
+      // core
+      forever begin
+        @(negedge clk);
+        if (fft_en == 1'b1) begin
+          tmp = $fscanf(fp, "(%d+%dj), (%d+%dj)\n", dout_1_re, dout_1_im, dout_2_re, dout_2_im);
+          if (dout_1_re == fft_dout_1_re 
+          &&  dout_1_im == fft_dout_1_im
+          &&  dout_2_re == fft_dout_2_re 
+          &&  dout_2_im == fft_dout_2_im ) begin
+            $display("\t\t check PASS!!!");
+          end
+          else begin
+            $display("\t\t @(%t), check FAIL!!!", $time);
+          end
+        end
+      end
+    end
+  endtask
 
 endmodule
