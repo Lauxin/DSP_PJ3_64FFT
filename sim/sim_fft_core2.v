@@ -167,7 +167,7 @@ module `SIM_TOP;
       fp = $fopen(`INIT_FFT_W_N_FILE, "r");
 
       // logs
-      $display("\t\t read wn for fft...");
+      $display("\n\t read wn for fft...");
 
       // core
       forever begin
@@ -200,6 +200,9 @@ module `SIM_TOP;
     begin
       // open files
       fp = $fopen(`CHKO_FFT_DAT_FILE, "r");
+
+      // log
+      $display("\n\t autocheck fft2 output...");
 
       // core
       forever begin
