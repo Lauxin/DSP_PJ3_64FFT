@@ -252,6 +252,7 @@ module `SIM_TOP;
   task CHKO_FFT_DAT;
     // variables
     integer fp;
+    integer fp_dump;
     integer i;
     integer tmp;
     reg [8 -1 : 0] correct_flag;
