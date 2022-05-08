@@ -191,10 +191,10 @@ module `SIM_TOP;
     integer fp;
     integer i;
     integer tmp;
-    reg  [FFT_WN_WD -1 :0] dout_1_re;
-    reg  [FFT_WN_WD -1 :0] dout_1_im;
-    reg  [FFT_WN_WD -1 :0] dout_2_re;
-    reg  [FFT_WN_WD -1 :0] dout_2_im;
+    reg  signed [FFT_WN_WD -1 :0] dout_1_re;
+    reg  signed [FFT_WN_WD -1 :0] dout_1_im;
+    reg  signed [FFT_WN_WD -1 :0] dout_2_re;
+    reg  signed [FFT_WN_WD -1 :0] dout_2_im;
 
     // main body
     begin
@@ -216,7 +216,10 @@ module `SIM_TOP;
             $display("\t\t check PASS!!!");
           end
           else begin
-            $display("\t\t @(%t), check FAIL!!!", $time);
+            $display("\t\t @(%t), check FAIL!!! should be (%d+%dj) (%d+%dj), rather than (%d+%dj) (%d+%dj)", $time, 
+              dout_1_re    , dout_1_im    , dout_2_re    , dout_2_im    ,
+              fft_dout_1_re, fft_dout_1_im, fft_dout_2_re, fft_dout_2_im
+            );
           end
         end
       end

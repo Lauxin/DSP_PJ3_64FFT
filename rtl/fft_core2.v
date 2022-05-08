@@ -67,11 +67,17 @@ module fft_core2(
     dat_mul_add_2_im = dat_mul_upper_im - dat_mul_downer_im;
   end
 
-  // fraction floor
+  // floor
   assign fft_dout_1_re = (dat_mul_add_1_re >>> DATA_WN_FRC_WD);
   assign fft_dout_1_im = (dat_mul_add_1_im >>> DATA_WN_FRC_WD);
   assign fft_dout_2_re = (dat_mul_add_2_re >>> DATA_WN_FRC_WD);
   assign fft_dout_2_im = (dat_mul_add_2_im >>> DATA_WN_FRC_WD);
+
+  // round
+  // assign fft_dout_1_re = dat_mul_add_1_re[DATA_MUL_ADD_WD-1 : DATA_WN_FRC_WD] + (dat_mul_add_1_re[DATA_MUL_ADD_WD-1] ? (dat_mul_add_1_re[DATA_WN_FRC_WD-1] & |dat_mul_add_1_re[DATA_WN_FRC_WD-2 : 0]) : dat_mul_add_1_re[DATA_WN_FRC_WD-1]);
+  // assign fft_dout_1_im = dat_mul_add_1_im[DATA_MUL_ADD_WD-1 : DATA_WN_FRC_WD] + (dat_mul_add_1_im[DATA_MUL_ADD_WD-1] ? (dat_mul_add_1_im[DATA_WN_FRC_WD-1] & |dat_mul_add_1_im[DATA_WN_FRC_WD-2 : 0]) : dat_mul_add_1_im[DATA_WN_FRC_WD-1]);
+  // assign fft_dout_2_re = dat_mul_add_2_re[DATA_MUL_ADD_WD-1 : DATA_WN_FRC_WD] + (dat_mul_add_2_re[DATA_MUL_ADD_WD-1] ? (dat_mul_add_2_re[DATA_WN_FRC_WD-1] & |dat_mul_add_2_re[DATA_WN_FRC_WD-2 : 0]) : dat_mul_add_2_re[DATA_WN_FRC_WD-1]);
+  // assign fft_dout_2_im = dat_mul_add_2_im[DATA_MUL_ADD_WD-1 : DATA_WN_FRC_WD] + (dat_mul_add_2_im[DATA_MUL_ADD_WD-1] ? (dat_mul_add_2_im[DATA_WN_FRC_WD-1] & |dat_mul_add_2_im[DATA_WN_FRC_WD-2 : 0]) : dat_mul_add_2_im[DATA_WN_FRC_WD-1]);
 
   //!!! overflow
 
