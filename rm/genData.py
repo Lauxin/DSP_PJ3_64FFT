@@ -1,10 +1,13 @@
 import numpy as np
 
-def genSin(amp, t, len=64):
-    return np.array([amp * np.sin(2 * np.pi * x / t) for x in range(len)])
+def genSin(amp, t, len=64, offset=0):
+    return np.array([amp * np.sin(2 * np.pi / t * x) + offset for x in range(len)])
         
-def genLinear(thLow, thHigh, len=64):
-    return np.linspace(thLow, thHigh, len)
+def genTri(amp, t, len=64, offset=0):
+    return np.array([amp * 2 * (1 / t * x - np.floor(1 / t * x)) - amp + offset for x in range(len)])
+
+def genSqr(amp, t, len=64, offset=0):
+    return np.array([amp * np.sign(np.sin(2 * np.pi / t * x)) + offset for x in range(len)])
 
 def genRand(thLow, thHigh, len=64):
     return (thHigh-thLow) * np.random.rand(len) + thLow

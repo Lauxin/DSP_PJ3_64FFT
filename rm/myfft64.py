@@ -67,10 +67,10 @@ def fft8Dump(dataIn, wn, dataOut):
 ###=====TOOLKIT=====###
 def wn_fix(data, bits):
     if isinstance(data, complex):
-        return np.floor(data.real * pow(2,bits)) / pow(2,bits) + \
-               np.floor(data.imag * pow(2,bits)) / pow(2,bits) * 1j
+        return np.round(data.real * pow(2,bits)) / pow(2,bits) + \
+               np.round(data.imag * pow(2,bits)) / pow(2,bits) * 1j
     else:
-        return np.floor(data * pow(2,bits)) / pow(2,bits)
+        return np.round(data * pow(2,bits)) / pow(2,bits)
 
 
 def complex_floor(data):
@@ -186,7 +186,7 @@ def fft64Base8(data):
 
 if __name__ == "__main__":
     #--- TEST FFT8 ---
-    # testIn = genData.genLinear(-4,4,8)
+    # testIn = genData.genSin(5,4,8)
     # wnD1 = [np.exp(-1j * 2 * np.pi * 0/2)]
     # wnD2 = [np.exp(-1j * 2 * np.pi * i/4) for i in range(2)]
     # wnD3 = [np.exp(-1j * 2 * np.pi * i/8) for i in range(4)]
@@ -207,7 +207,7 @@ if __name__ == "__main__":
     # print(np.fft.fft(testIn))
 
     #--- TEST FFT64 ---
-    testIn = genData.genLinear(-40,40,64)
+    testIn = genData.genTri(40,40,64)
     print(fft64Base8(testIn))
     print(np.fft.fft(testIn))
 

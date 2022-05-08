@@ -4,9 +4,11 @@ import genData
 import myfft64
 
 if __name__ == "__main__":    
-    #dat = genData.genSin(1,2.5,64)
-    dat = genData.genLinear(-40,40,64)
-    #dat = genData.genRand(0,10)
+    # dat = genData.genSin(40,10,64,10)
+    dat = genData.genTri(40,50,64,10)
+    # dat = genData.genSqr(10,25,64)
+    # dat = genData.genRand(0,10)
+    print(dat)
     plt.figure()
     plt.plot(dat)
     
