@@ -20,7 +20,7 @@ module fft_core8 (
 
   vld_out       ,
   fft_dout_re   ,
-  fft_dout_im   ,
+  fft_dout_im
 );
   
 
