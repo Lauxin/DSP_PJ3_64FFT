@@ -10,8 +10,9 @@
 
 //--- GLOBAL ---------------------------
 `define     SIM_TOP             sim_fft_core2
+`define     SIM_TOP_STR         "sim_fft_core8"
 `define     DUT_TOP             fft_core2
-
+`define     DUT_TOP_STR         "fft_core2"
 //--- LOCAL ----------------------------
 `define     DUT_FULL_CLK        10
 `define     DUT_HALF_CLK        (`DUT_FULL_CLK / 2)
@@ -57,7 +58,7 @@ module `SIM_TOP;
 
 //*** WIRE/REG *****************************************************************
   reg                               clk ;
-  reg                               rst ;
+  reg                               rst_n ;
   reg                               fft_en;
 
 
@@ -88,15 +89,18 @@ module `SIM_TOP;
     end
   end
 
-  // rst
+  // rst_n
   initial begin
-    rst = 'd0;
+    rst_n = 'd0;
     #(2 * `DUT_FULL_CLK);
-    rst = 'd1;
+    rst_n = 'd1;
   end
 
   // main
   initial begin
+    // log
+    $display( "\n\n*** CHECK %s BEGIN ! ***\n", `DUT_TOP_STR );
+
     // init
     fft_en = 1'b0;
 
