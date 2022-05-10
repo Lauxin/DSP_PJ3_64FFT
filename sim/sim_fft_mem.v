@@ -37,44 +37,52 @@ module `SIM_TOP;
 reg                                      rst_n     ;
 reg                                      clk       ;
 reg                                      dim_sel   ;
-reg        [SIZE_MAT_WD           -1 :0] adr_1x8   ;
+reg        [SIZE_MAT_WD           -1 :0] rd_addr_1x8;
 reg                                      rd_vld_1x8;
 wire                                     rd_vld_1x8_o;
 wire       [SIZE_MAT*FFT_DATA_WD  -1 :0] rd_dat_1x8;
+reg        [SIZE_MAT_WD           -1 :0] wr_addr_1x8;
 reg                                      wr_vld_1x8;
 reg        [SIZE_MAT*FFT_DATA_WD  -1 :0] wr_dat_1x8;
-reg        [SIZE_MAT_FUL_WD       -1 :0] adr_1x1   ;
+reg        [SIZE_MAT_FUL_WD       -1 :0] rd_addr_1x1;
 reg                                      rd_vld_1x1;
 wire                                     rd_vld_1x1_o;
 wire       [FFT_DATA_WD           -1 :0] rd_dat_1x1;
+reg        [SIZE_MAT_FUL_WD       -1 :0] wr_addr_1x1;
 reg                                      wr_vld_1x1;
 reg        [FFT_DATA_WD           -1 :0] wr_dat_1x1;
 
 //*** WIRE/REG *****************************************************************
 wire       [FFT_DATA_WD           -1 :0] rd_data_unfold[0:7];
 
-integer i;
+integer rd_cnt_1x1;
+integer wr_cnt_1x1;
+integer rd_cnt_1x8;
+integer wr_cnt_1x8;
+
 
 
 //*** DUT **********************************************************************
 `DUT_TOP #(
     .DATA_WD(FFT_DATA_WD)
 ) dut (
-  .rst_n       ( rst_n        ),
-  .clk         ( clk          ),
-  .dim_sel_i   ( dim_sel      ),
-  .adr_1x8_i   ( adr_1x8      ),
-  .rd_vld_1x8_i( rd_vld_1x8   ),
-  .rd_vld_1x8_o( rd_vld_1x8_o ),
-  .rd_dat_1x8_o( rd_dat_1x8   ),
-  .wr_vld_1x8_i( wr_vld_1x8   ),
-  .wr_dat_1x8_i( wr_dat_1x8   ),
-  .adr_1x1_i   ( adr_1x1      ),
-  .rd_vld_1x1_i( rd_vld_1x1   ),
-  .rd_vld_1x1_o( rd_vld_1x1_o ),
-  .rd_dat_1x1_o( rd_dat_1x1   ),
-  .wr_vld_1x1_i( wr_vld_1x1   ),
-  .wr_dat_1x1_i( wr_dat_1x1   )
+  .rst_n        ( rst_n        ),
+  .clk          ( clk          ),
+  .dim_sel_i    ( dim_sel      ),
+  .rd_addr_1x8_i( rd_addr_1x8  ),
+  .rd_vld_1x8_i ( rd_vld_1x8   ),
+  .rd_vld_1x8_o ( rd_vld_1x8_o ),
+  .rd_dat_1x8_o ( rd_dat_1x8   ),
+  .wr_addr_1x8_i( wr_addr_1x8  ),
+  .wr_vld_1x8_i ( wr_vld_1x8   ),
+  .wr_dat_1x8_i ( wr_dat_1x8   ),
+  .rd_addr_1x1_i( rd_addr_1x1  ),
+  .rd_vld_1x1_i ( rd_vld_1x1   ),
+  .rd_vld_1x1_o ( rd_vld_1x1_o ),
+  .rd_dat_1x1_o ( rd_dat_1x1   ),
+  .wr_addr_1x1_i( wr_addr_1x1  ),
+  .wr_vld_1x1_i ( wr_vld_1x1   ),
+  .wr_dat_1x1_i ( wr_dat_1x1   )
 );
 
 //*** MAIN BODY ****************************************************************
@@ -110,75 +118,89 @@ integer i;
     $display( "\n\n*** CHECK %s BEGIN ! ***\n", `DUT_TOP_STR );
 
     // init
-    dim_sel    = 0;
-    adr_1x8    = 0;
-    rd_vld_1x8 = 0;
-    wr_vld_1x8 = 0;
-    wr_dat_1x8 = 0;
-    adr_1x1    = 0;
-    rd_vld_1x1 = 0;
-    wr_vld_1x1 = 0;
-    wr_dat_1x1 = 0;
+    dim_sel     = 0;
+    rd_addr_1x8 = 0;
+    rd_vld_1x8  = 0;
+    wr_addr_1x8 = 0;
+    wr_vld_1x8  = 0;
+    wr_dat_1x8  = 0;
+    rd_addr_1x1 = 0;
+    rd_vld_1x1  = 0;
+    wr_addr_1x1 = 0;
+    wr_vld_1x1  = 0;
+    wr_dat_1x1  = 0;
 
     // delay
     #(5 * `DUT_FULL_CLK);
 
     // main
-    //---wr_1x1---
-    for (i=0; i<64; i=i+1) begin
-      @(posedge clk);
-      adr_1x1 = i;
-      wr_vld_1x1 = 1;
-      wr_dat_1x1 = i;
-    end
-    @(posedge clk);
-    wr_vld_1x1 = 0;
+    fork
+      begin
+        //---wr_1x1---
+        for (wr_cnt_1x1 = 0; wr_cnt_1x1 < SIZE_MAT_FUL; wr_cnt_1x1 = wr_cnt_1x1 + 1) begin
+          @(posedge clk);
+          wr_addr_1x1 = wr_cnt_1x1;
+          wr_vld_1x1 = 1;
+          wr_dat_1x1 = wr_cnt_1x1;
+        end
+        @(posedge clk);
+        wr_vld_1x1 = 0;
+      end
+      begin
+        @(posedge clk);
+        //---rd_1x1---
+        for (rd_cnt_1x1 = 0; rd_cnt_1x1 < SIZE_MAT_FUL; rd_cnt_1x1 = rd_cnt_1x1 + 1) begin
+          @(posedge clk);
+          rd_addr_1x1 = rd_cnt_1x1;
+          rd_vld_1x1 = 1;
+        end
+        @(posedge clk);
+        rd_vld_1x1 = 0;
+      end
+    join
 
-    //---rd_1x1---
-    for (i=0; i<64; i=i+1) begin
-      @(posedge clk);
-      adr_1x1 = i;
-      rd_vld_1x1 = 1;
-    end
-    @(posedge clk);
-    rd_vld_1x1 = 0;
-
-    //---wr_1x8(row)---
-    for (i=0; i<8; i=i+1) begin
-      @(posedge clk);
-      adr_1x8 = i;
-      dim_sel = 0;
-      wr_vld_1x8 = 1;
-      wr_dat_1x8 = { 8{i[FFT_DATA_WD-1 : 0]} };
-    end
-    @(posedge clk);
-    wr_vld_1x8 = 0;
-
-    //---rd_1x8(row)---
-    for (i=0; i<8; i=i+1) begin
-      @(posedge clk);
-      adr_1x8 = i;
-      dim_sel = 0;
-      rd_vld_1x8 = 1;
-    end
-    @(posedge clk);
-    rd_vld_1x8 = 0;
+    fork
+      begin
+        //---wr_1x8(row)---
+        for (wr_cnt_1x8 = 0; wr_cnt_1x8 < SIZE_MAT; wr_cnt_1x8 = wr_cnt_1x8 + 1) begin
+          @(posedge clk);
+          wr_addr_1x8 = wr_cnt_1x8;
+          dim_sel = 0;
+          wr_vld_1x8 = 1;
+          wr_dat_1x8 = { 8{wr_cnt_1x8[FFT_DATA_WD-1 : 0]} };
+        end
+        @(posedge clk);
+        wr_vld_1x8 = 0;
+      end
+      begin
+        @(posedge clk);
+        //---rd_1x8(row)---
+        for (rd_cnt_1x8 = 0; rd_cnt_1x8 < SIZE_MAT; rd_cnt_1x8 = rd_cnt_1x8 + 1) begin
+          @(posedge clk);
+          rd_addr_1x8 = rd_cnt_1x8;
+          dim_sel = 0;
+          rd_vld_1x8 = 1;
+        end
+        @(posedge clk);
+        rd_vld_1x8 = 0;
+      end
+    join
 
     //---wr_1x8(col)---
-    for (i=0; i<8; i=i+1) begin
+    for (wr_cnt_1x8 = 0; wr_cnt_1x8 < SIZE_MAT; wr_cnt_1x8 = wr_cnt_1x8 + 1) begin
       @(posedge clk);
-      adr_1x8 = i;
+      wr_addr_1x8 = wr_cnt_1x8;
       dim_sel = 1;
       wr_vld_1x8 = 1;
-      wr_dat_1x8 = { 8{i[FFT_DATA_WD-1 : 0]} };
+      wr_dat_1x8 = { 8{wr_cnt_1x8[FFT_DATA_WD-1 : 0]} };
     end
     @(posedge clk);
     wr_vld_1x8 = 0;
 
     //---rd_1x8(col)---
-    for (i=0; i<8; i=i+1) begin
+    for (rd_cnt_1x8 = 0; rd_cnt_1x8 < SIZE_MAT; rd_cnt_1x8 = rd_cnt_1x8 + 1) begin
       @(posedge clk);
-      adr_1x8 = i;
+      rd_addr_1x8 = rd_cnt_1x8;
       dim_sel = 1;
       rd_vld_1x8 = 1;
     end
