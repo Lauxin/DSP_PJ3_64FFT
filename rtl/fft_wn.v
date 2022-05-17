@@ -8,8 +8,12 @@
 //------------------------------------------------------------------------------
 
 module fft_wn(
+  clk,
+  rst_n,
+  vld_in,
   fft_stg,
   fft_idx,
+  vld_out,
   fft_wn_re,
   fft_wn_im
 );
@@ -19,14 +23,21 @@ parameter FFT_WN_WD = 10;
 
 
 //*** INPUT/OUTPUT *************************************************************
+input                                   clk;
+input                                   rst_n;
+input                                   vld_in;
 input         [1                 -1 :0] fft_stg;
 input         [3                 -1 :0] fft_idx;
+output reg                              vld_out;
 output reg    [7*FFT_WN_WD       -1 :0] fft_wn_re;
 output reg    [7*FFT_WN_WD       -1 :0] fft_wn_im;
 
 
 //*** WIRE/REG *****************************************************************
 wire          [FFT_WN_WD         -2 :0] mem_wn[0 : 16];
+
+reg           [7*FFT_WN_WD       -1 :0] fft_wn_re_tmp;
+reg           [7*FFT_WN_WD       -1 :0] fft_wn_im_tmp;
 
 
 //*** MAIN BODY ****************************************************************
@@ -63,7 +74,7 @@ always @(*) begin
   //wn[0]
   //wn[0::16]
   //wn[0::8]
-    fft_wn_re = {
+    fft_wn_re_tmp = {
       {1'b1,~mem_wn[8 ] + 1'b1},  //wn[24]
       {1'b0, mem_wn[0 ]},  //wn[16]
       {1'b0, mem_wn[8 ]},  //wn[8]
@@ -72,7 +83,7 @@ always @(*) begin
       {1'b0, mem_wn[16]},  //wn[0]
       {1'b0, mem_wn[16]}   //wn[0]
     };
-    fft_wn_im ={
+    fft_wn_im_tmp ={
       {1'b1,~mem_wn[8 ] + 1'b1},  //wn[24]
       {1'b1,~mem_wn[16] + 1'b1},  //wn[16]
       {1'b1,~mem_wn[8 ] + 1'b1},  //wn[8]
@@ -86,7 +97,7 @@ always @(*) begin
   //wn[i*4]
   //wn[i*2::16]
   //wn[i::8]
-    fft_wn_re = {
+    fft_wn_re_tmp = {
       {1'b1                       , ~mem_wn[8  + fft_idx] + 1'b1},  //wn[i+24]
       {(fft_idx > 0 ? 1'b1 : 1'b0), (mem_wn[fft_idx  ] ^ {9{fft_idx > 0}}) + (fft_idx > 0 ? 1'b1 : 1'b0)},  //wn[i+16]
       {1'b0                       ,  mem_wn[8  - fft_idx]},  //wn[i+8]
@@ -95,7 +106,7 @@ always @(*) begin
       {1'b0                       ,  mem_wn[16 - fft_idx*2]},  //wn[2i]
       {(fft_idx > 4 ? 1'b1 : 1'b0), (mem_wn[fft_idx > 4 ? fft_idx*4 - 16 : 16 - fft_idx*4] ^ {9{fft_idx > 4}}) + (fft_idx > 4 ? 1'b1 : 1'b0)}   //wn[4i]
     };
-    fft_wn_im = {
+    fft_wn_im_tmp = {
       {1'b1                       , ~mem_wn[8  - fft_idx] + 1'b1},  //wn[i+24]
       {1'b1                       , ~mem_wn[16 - fft_idx] + 1'b1},  //wn[i+16]
       {1'b1                       , ~mem_wn[8  + fft_idx] + 1'b1},  //wn[i+8]
@@ -105,6 +116,24 @@ always @(*) begin
       {(fft_idx > 0 ? 1'b1 : 1'b0), (mem_wn[fft_idx > 4 ? 32 - fft_idx*4 : fft_idx*4] ^ {9{fft_idx > 0}}) + (fft_idx > 0 ? 1'b1 : 1'b0)}   //wn[4i]
     };
   end
+end
+
+always @(posedge clk or negedge rst_n) begin
+  if (!rst_n) begin
+    fft_wn_re <= 'd0;
+    fft_wn_im <= 'd0;
+  end
+  else begin
+    fft_wn_re <= fft_wn_re_tmp;
+    fft_wn_im <= fft_wn_im_tmp;
+  end
+end
+
+always @(posedge clk or negedge rst_n) begin
+  if (!rst_n)
+    vld_out <= 1'b0;
+  else
+    vld_out <= vld_in;
 end
 
 endmodule

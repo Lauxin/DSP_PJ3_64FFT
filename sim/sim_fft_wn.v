@@ -33,8 +33,12 @@ module `SIM_TOP;
 
 
 //*** INPUT/OUTPUT *************************************************************
+  reg                                      clk;
+  reg                                      rst_n;
+  reg                                      vld_in;
   reg                                      fft_stg;
   reg        [3                     -1 :0] fft_idx;
+  wire                                     vld_out;
   wire       [FFT_WN_WD*7           -1 :0] fft_wn_re;
   wire       [FFT_WN_WD*7           -1 :0] fft_wn_im;
 
@@ -42,10 +46,6 @@ module `SIM_TOP;
 //*** WIRE/REG *****************************************************************
   wire       [FFT_WN_WD             -1 :0] wn_re_unfold[0:7-1];
   wire       [FFT_WN_WD             -1 :0] wn_im_unfold[0:7-1];
-
-  reg                                      clk;
-  reg                                      rst_n;
-  reg                                      vld_in;
 
   reg signed [FFT_WN_WD             -1 :0] ram_ref_wn_re[0:7-1];
   reg signed [FFT_WN_WD             -1 :0] ram_ref_wn_im[0:7-1];
@@ -57,8 +57,12 @@ module `SIM_TOP;
   `DUT_TOP #(
     .FFT_WN_WD(FFT_WN_WD)
   ) dut (
+    .clk       ( clk       ),
+    .rst_n     ( rst_n     ),
+    .vld_in    ( vld_in    ),
     .fft_stg   ( fft_stg   ),
     .fft_idx   ( fft_idx   ),
+    .vld_out   ( vld_out   ),
     .fft_wn_re ( fft_wn_re ),
     .fft_wn_im ( fft_wn_im )
   );
@@ -153,7 +157,7 @@ module `SIM_TOP;
       // core
       forever begin
         @(negedge clk);
-        if (vld_in) begin
+        if (vld_out) begin
           for (i=0; i<7; i=i+1) begin
             tmp = $fscanf(fp, "(%d+%dj), ", ram_ref_wn_re[i], ram_ref_wn_im[i]);
             correct_flag[i] = (ram_ref_wn_re[i] == wn_re_unfold[i]) && (ram_ref_wn_im[i] == wn_im_unfold[i]);
