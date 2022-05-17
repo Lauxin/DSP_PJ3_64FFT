@@ -316,7 +316,6 @@ module fft_core8 (
     fft_stg3_im_unfold[0]
   };
 
-//*** OUTPUT *******************************************************************
   assign vld_out = vld_d2 ;
 
 endmodule

@@ -64,7 +64,7 @@ integer wr_cnt_1x8;
 
 //*** DUT **********************************************************************
 `DUT_TOP #(
-    .DATA_WD(FFT_DATA_WD)
+  .DATA_WD(FFT_DATA_WD)
 ) dut (
   .rst_n        ( rst_n        ),
   .clk          ( clk          ),
