@@ -247,12 +247,12 @@ module `SIM_TOP;
 //*** CHKO **********************************************************************
   initial fork
     CHKO_FFT_DAT;
+    DUMP_FFT_DAT;
   join
 
   task CHKO_FFT_DAT;
     // variables
     integer fp;
-    integer fp_dump;
     integer i;
     integer tmp;
     reg [8 -1 : 0] correct_flag;
@@ -261,10 +261,8 @@ module `SIM_TOP;
     begin
       // open files
       fp = $fopen(`CHKO_FFT_DAT_FILE, "r");
-      fp_dump = $fopen(`DUMP_FFT_DAT_FILE, "w");
 
       // logs
-      $display("\n\t dump fft output...");
       $display("\t autocheck fft output...");
 
       // core
@@ -273,7 +271,6 @@ module `SIM_TOP;
 
         if (vld_out) begin
           for (i=0; i<8; i=i+1) begin
-            $fdisplay(fp_dump, "%d+%di", ram_fft_dout_re[i], ram_fft_dout_im[i]);
             tmp = $fscanf(fp, "(%d+%dj), ", ram_ref_dout_re[i], ram_ref_dout_im[i]);
             correct_flag[i] = (ram_ref_dout_re[i] == ram_fft_dout_re[i]) && (ram_ref_dout_im[i] == ram_fft_dout_im[i]);
           end
@@ -287,6 +284,33 @@ module `SIM_TOP;
       end
     end
 
+  endtask
+
+  task DUMP_FFT_DAT;
+    // variables
+    integer fp;
+    integer i;
+
+    // main body
+    begin
+      // open files
+      fp = $fopen(`DUMP_FFT_DAT_FILE, "w");
+      
+      // logs
+      $display("\n\t dump fft output...");
+
+      // core
+      forever begin
+        @(negedge clk) ;
+
+        if (vld_out) begin
+          for (i=0; i<8; i=i+1) begin
+            $fdisplay(fp, "%d+%di", ram_fft_dout_re[i], ram_fft_dout_im[i]);
+          end
+        end
+      end
+    end
+    
   endtask
 
 
