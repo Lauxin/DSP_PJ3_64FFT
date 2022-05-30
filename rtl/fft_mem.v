@@ -6,6 +6,9 @@
   //  Description    : Base8 FFT register manager.
   //  Modified       : 2022-05-10
   //  Description    : add rd and wr addr, make dual-ports SRAM
+  //                   wr 1x1 priority higher than 1x8
+  //                   rd 1x1 and 1x8 are independent
+  //                   wr and rd are independent
 //------------------------------------------------------------------------------
 
 module fft_mem (
@@ -35,7 +38,7 @@ module fft_mem (
 );
 
 //*** PARAMETER ************
-  parameter DATA_WD = 10 ;
+  parameter DATA_WD = 20 ;
 
   localparam SIZE_MAT        = 8 ;
   localparam SIZE_MAT_WD     = 3 ;
@@ -91,7 +94,7 @@ module fft_mem (
   always @ (posedge clk or negedge rst_n) begin
     if (!rst_n) begin
       for (i=0; i<SIZE_MAT_FUL; i=i+1) begin
-        mem_array[i] <= 'hfff;
+        mem_array[i] <= 'hfffff;
       end
     end
     else if (wr_vld_1x1_i) begin
@@ -121,14 +124,20 @@ module fft_mem (
     end
   end
 
-  //rd
+  //rd_dat_1x1
   always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
       rd_dat_1x1_r <= 'd0 ;
-      rd_dat_1x8_r <= 'd0 ;
     end
     else if (rd_vld_1x1_i) begin
       rd_dat_1x1_r <= mem_array[rd_addr_1x1_i] ;
+    end
+  end
+
+  //rd_dat_1x8
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      rd_dat_1x8_r <= 'd0 ;
     end
     else if (rd_vld_1x8_i)begin
       if (!dim_sel_i) begin  //row
@@ -158,9 +167,10 @@ module fft_mem (
     end
   end
 
+  //rd_vld
   always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-      rd_vld_1x8_r <= 'd0 ;
+      rd_vld_1x1_r <= 'd0 ;
       rd_vld_1x8_r <= 'd0 ;
     end
     else begin
