@@ -1,6 +1,7 @@
 import numpy as np
 import genData
 
+
 ###=====DUMP=====###
 def fftDumpInit():
     global fft2ChkInDatFp
@@ -9,12 +10,16 @@ def fftDumpInit():
     global fft8ChkInDatFp
     global fft8ChkInWnFp 
     global fft8ChkOutFp  
+    global fft64ChkInFp 
+    global fft64ChkOutFp
     fft2ChkInDatFp = open("./dump/fft2_data_in.dat" , "w")
     fft2ChkInWnFp  = open("./dump/fft2_wn_in.dat"   , "w")
     fft2ChkOutFp   = open("./dump/fft2_data_out.dat", "w")
     fft8ChkInDatFp = open("./dump/fft8_data_in.dat" , "w")
     fft8ChkInWnFp  = open("./dump/fft8_wn_in.dat"   , "w")
     fft8ChkOutFp   = open("./dump/fft8_data_out.dat", "w")
+    fft64ChkInFp   = open("./dump/fft64_data_in.dat" , "w")
+    fft64ChkOutFp  = open("./dump/fft64_data_out.dat", "w")
     return 0
 
 
@@ -25,12 +30,16 @@ def fftDumpEnd():
     global fft8ChkInDatFp
     global fft8ChkInWnFp 
     global fft8ChkOutFp  
+    global fft64ChkInFp 
+    global fft64ChkOutFp
     fft2ChkInDatFp.close()
     fft2ChkInWnFp .close()
     fft2ChkOutFp  .close()
     fft8ChkInDatFp.close()
     fft8ChkInWnFp .close()
     fft8ChkOutFp  .close()
+    fft64ChkInFp  .close()
+    fft64ChkOutFp .close()
     return 0
 
 
@@ -62,6 +71,15 @@ def fft8Dump(dataIn, wn, dataOut):
     # fft8ChkInDatFp.write(",".join( map(lambda x:str(complex(x)),dataIn ) ) + "\n")
     # fft8ChkOutFp  .write(",".join( map(lambda x:str(complex(x)),dataOut) ) + "\n")
     # fft8ChkInWnFp .write(",".join( map(lambda x:str(complex(x*256)),wn ) ) + "\n")
+
+
+def fft64Dump(dataIn, dataOut):
+    global fft64ChkInFp 
+    global fft64ChkOutFp
+    dump_dataIn  = ["({:d}+{:d}j)".format(int(complex(x).real)    , int(complex(x).imag)    ) for x in dataIn]
+    dump_dataOut = ["({:d}+{:d}j)".format(int(complex(x).real)    , int(complex(x).imag)    ) for x in dataOut]
+    fft64ChkInFp .write("\n".join(dump_dataIn ))
+    fft64ChkOutFp.write("\n".join(dump_dataOut))
 
 
 ###=====TOOLKIT=====###
@@ -179,6 +197,7 @@ def fft64Base8(data):
     fft64D2Out = np.array(fft64D2Out).T
     fft64D2Out = fft64D2Out.reshape(64)
 
+    fft64Dump(np.floor(data), fft64D2Out)
     fftDumpEnd()
     
     return fft64D2Out
